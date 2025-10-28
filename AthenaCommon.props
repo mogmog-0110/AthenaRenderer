@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="UserMacros">
+    <AthenaRootDir>$(SolutionDir)</AthenaRootDir>
+    <AthenaIncludeDir>$(AthenaRootDir)AthenaCore\include</AthenaIncludeDir>
+    <ExternalDir>$(AthenaRootDir)external</ExternalDir>
+    <BinDir>$(AthenaRootDir)bin\$(Platform)\$(Configuration)\</BinDir>
+    <ObjDir>$(AthenaRootDir)obj\$(Platform)\$(Configuration)\$(ProjectName)\</ObjDir>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <OutDir>$(BinDir)</OutDir>
+    <IntDir>$(ObjDir)</IntDir>
+  </PropertyGroup>
+  
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <WarningLevel>Level4</WarningLevel>
+      <AdditionalIncludeDirectories>
+        $(AthenaIncludeDir);
+        $(ExternalDir)\imgui;
+        $(ExternalDir)\imgui\backends;
+        $(ExternalDir)\stb;
+        %(AdditionalIncludeDirectories)
+      </AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>
+        WIN32;
+        _WINDOWS;
+        UNICODE;
+        _UNICODE;
+        %(PreprocessorDefinitions)
+      </PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+</Project>
