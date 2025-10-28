@@ -1,0 +1,40 @@
+[08:51:15][INFO] ===========================================
+[08:51:15][INFO] Athena Renderer - Log Started
+[08:51:15][INFO] ===========================================
+[08:51:15][INFO] ===========================================
+[08:51:15][INFO] Athena Renderer - Phase 1: Clear Test
+[08:51:15][INFO] ===========================================
+[08:51:15][INFO] Initializing DirectX 12...
+[08:51:15][INFO] Initializing Device...
+[08:51:15][INFO] D3D12 Debug Layer enabled
+[08:51:15][INFO] Selected GPU: NVIDIA GeForce GTX 1660 SUPER
+[08:51:15][INFO] VRAM: 5.83 GB
+[08:51:15][INFO] Feature Support:
+[08:51:15][INFO]   Mesh Shaders: Yes
+[08:51:15][INFO]   Raytracing: Yes
+[08:51:15][INFO]   VRS: Yes
+[08:51:15][INFO] Device initialized successfully
+[08:51:15][INFO] Initializing CommandQueue...
+[08:51:15][INFO] CommandQueue initialized successfully
+[08:51:15][INFO] Initializing SwapChain (1280x720)...
+[08:51:15][INFO] Created 3 back buffers
+[08:51:15][INFO] SwapChain initialized successfully
+[08:51:15][INFO] Initializing DescriptorHeap (type: 2, capacity: 3, shaderVisible: No)...
+[08:51:15][INFO] DescriptorHeap initialized (descriptor size: 32 bytes)
+[08:51:15][INFO] Creating Render Target Views...
+[08:51:15][INFO] Render Target Views created
+[08:51:15][INFO] DirectX 12 initialized successfully
+[08:51:15][INFO] Initialization complete. Entering main loop...
+[08:51:17][INFO] Cleaning up resources...
+[08:51:17][INFO] Shutting down DescriptorHeap...
+[08:51:17][INFO] DescriptorHeap shut down successfully
+[08:51:17][INFO] Shutting down SwapChain...
+[08:51:17][INFO] SwapChain shut down successfully
+[08:51:17][INFO] Shutting down CommandQueue...
+[08:51:17][INFO] CommandQueue shut down successfully
+[08:51:17][INFO] Shutting down Device...
+[08:51:17][INFO] Cleanup complete
+[08:51:17][INFO] Application shutting down normally
+[08:51:17][INFO] ===========================================
+[08:51:17][INFO] Athena Renderer - Log Ended
+[08:51:17][INFO] ===========================================

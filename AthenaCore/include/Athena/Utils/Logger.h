@@ -1,80 +1,59 @@
 #pragma once
-#include <cstdio>
-#include <cstdarg>
-#include <windows.h>
 
 namespace Athena {
 
     /**
-     * @brief シンプルなログ出力クラス
+     * @brief ログ出力システム
      *
-     * デバッグ情報をVisual Studioの出力ウィンドウに表示。
-     * OutputDebugStringを使用してWindows標準のデバッグ出力に送信。
+     * Visual Studioの出力ウィンドウとファイルの両方にログを出力。
+     * シングルトンパターンで実装されており、プログラム全体で共有。
      */
     class Logger {
     public:
-        static void Initialize() {
-            // 初期化処理（将来的にファイル出力などを追加可能）
-        }
+        /**
+         * @brief ログシステムを初期化
+         *
+         * ログファイル（athena_log.txt）を作成し、ログ出力を開始。
+         * プログラムの最初に一度だけ呼び出す。
+         */
+        static void Initialize();
 
-        static void Shutdown() {
-            // 終了処理
-        }
+        /**
+         * @brief ログシステムをシャットダウン
+         *
+         * ログファイルを閉じ、リソースを解放。
+         * プログラムの最後に一度だけ呼び出す。
+         */
+        static void Shutdown();
 
         /**
          * @brief 情報ログを出力
+         *
          * @param format printfスタイルのフォーマット文字列
          * @param ... 可変長引数
+         *
+         * 例: Logger::Info("Device initialized: %s", deviceName);
          */
-        static void Info(const char* format, ...) {
-            char buffer[1024];
-            va_list args;
-            va_start(args, format);
-            vsnprintf(buffer, sizeof(buffer), format, args);
-            va_end(args);
-
-            // Visual Studioの出力ウィンドウに表示
-            OutputDebugStringA("[INFO] ");
-            OutputDebugStringA(buffer);
-            OutputDebugStringA("\n");
-
-            // コンソールにも出力（将来的にコンソールアプリを作る場合用）
-            printf("[INFO] %s\n", buffer);
-        }
+        static void Info(const char* format, ...);
 
         /**
          * @brief 警告ログを出力
+         *
+         * @param format printfスタイルのフォーマット文字列
+         * @param ... 可変長引数
          */
-        static void Warning(const char* format, ...) {
-            char buffer[1024];
-            va_list args;
-            va_start(args, format);
-            vsnprintf(buffer, sizeof(buffer), format, args);
-            va_end(args);
-
-            OutputDebugStringA("[WARNING] ");
-            OutputDebugStringA(buffer);
-            OutputDebugStringA("\n");
-
-            printf("[WARNING] %s\n", buffer);
-        }
+        static void Warning(const char* format, ...);
 
         /**
          * @brief エラーログを出力
+         *
+         * @param format printfスタイルのフォーマット文字列
+         * @param ... 可変長引数
          */
-        static void Error(const char* format, ...) {
-            char buffer[1024];
-            va_list args;
-            va_start(args, format);
-            vsnprintf(buffer, sizeof(buffer), format, args);
-            va_end(args);
+        static void Error(const char* format, ...);
 
-            OutputDebugStringA("[ERROR] ");
-            OutputDebugStringA(buffer);
-            OutputDebugStringA("\n");
-
-            printf("[ERROR] %s\n", buffer);
-        }
+    private:
+        static void GetTimeString(char* buffer, size_t bufferSize);
     };
 
 } // namespace Athena

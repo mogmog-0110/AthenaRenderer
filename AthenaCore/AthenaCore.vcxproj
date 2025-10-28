@@ -145,11 +145,18 @@ _WINDOWS
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\Athena\Core\CommandQueue.h" />
+    <ClInclude Include="include\Athena\Core\DescriptorHeap.h" />
     <ClInclude Include="include\Athena\Core\Device.h" />
+    <ClInclude Include="include\Athena\Core\SwapChain.h" />
     <ClInclude Include="include\Athena\Utils\Logger.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Athena\Core\CommandQueue.cpp" />
+    <ClCompile Include="src\Athena\Core\DescriptorHeap.cpp" />
     <ClCompile Include="src\Athena\Core\Device.cpp" />
+    <ClCompile Include="src\Athena\Core\SwapChain.cpp" />
+    <ClCompile Include="src\Athena\Utils\Logger.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
