@@ -416,3 +416,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Athena Renderer runtime files
+athena_log.txt
+**/athena_log.txt

@@ -145,13 +145,16 @@ _WINDOWS
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\Athena\Resources\Buffer.h" />
     <ClInclude Include="include\Athena\Core\CommandQueue.h" />
     <ClInclude Include="include\Athena\Core\DescriptorHeap.h" />
     <ClInclude Include="include\Athena\Core\Device.h" />
     <ClInclude Include="include\Athena\Core\SwapChain.h" />
     <ClInclude Include="include\Athena\Utils\Logger.h" />
+    <ClInclude Include="include\Athena\Utils\Math.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Athena\Resources\Buffer.cpp" />
     <ClCompile Include="src\Athena\Core\CommandQueue.cpp" />
     <ClCompile Include="src\Athena\Core\DescriptorHeap.cpp" />
     <ClCompile Include="src\Athena\Core\Device.cpp" />
