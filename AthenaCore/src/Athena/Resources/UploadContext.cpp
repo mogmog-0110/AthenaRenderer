@@ -7,7 +7,7 @@ namespace Athena {
     UploadContext::UploadContext() = default;
 
     UploadContext::~UploadContext() {
-        Shutdown();
+        //Shutdown();
     }
 
     void UploadContext::Initialize(ID3D12Device* device, ID3D12CommandQueue* commandQueue) {
@@ -54,20 +54,26 @@ namespace Athena {
     }
 
     void UploadContext::Shutdown() {
-        WaitForGPU();
+        if (!commandQueue) {
+            return;  // 既に解放済み
+        }
 
+        // アップロードバッファをクリア
         uploadBuffers.clear();
 
+        // イベントハンドルを解放
         if (fenceEvent) {
             CloseHandle(fenceEvent);
             fenceEvent = nullptr;
         }
 
+        // ComPtrのリソースを解放
         fence.Reset();
         commandList.Reset();
         commandAllocator.Reset();
-        commandQueue.Reset();
-        device.Reset();
+
+        commandQueue = nullptr;
+        device = nullptr;
     }
 
     void UploadContext::Begin() {

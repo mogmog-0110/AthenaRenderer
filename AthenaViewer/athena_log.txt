@@ -1,70 +1,83 @@
-[13:06:08][INFO] ===========================================
-[13:06:08][INFO] Athena Renderer - Log Started
-[13:06:08][INFO] ===========================================
-[13:06:08][INFO] ==========================================================
-[13:06:08][INFO]   Athena Renderer - DEBUG MODE
-[13:06:08][INFO]   青い画面問題の診断を開始します
-[13:06:08][INFO] ==========================================================
-[13:06:08][INFO] ? Window created
-[13:06:08][INFO] Initializing Device...
-[13:06:08][INFO] D3D12 Debug Layer enabled
-[13:06:08][INFO] Selected GPU: NVIDIA GeForce GTX 1660 SUPER
-[13:06:08][INFO] VRAM: 5.83 GB
-[13:06:08][INFO] Feature Support:
-[13:06:08][INFO]   Mesh Shaders: Yes
-[13:06:08][INFO]   Raytracing: Yes
-[13:06:08][INFO]   VRS: Yes
-[13:06:08][INFO] Device initialized successfully
-[13:06:08][INFO] ? Device initialized
-[13:06:08][INFO] Initializing CommandQueue...
-[13:06:08][INFO] CommandQueue initialized successfully
-[13:06:08][INFO] ? CommandQueue initialized
-[13:06:08][INFO] Initializing SwapChain (1280x720)...
-[13:06:08][INFO] Created 3 back buffers
-[13:06:08][INFO] SwapChain initialized successfully
-[13:06:08][INFO] ? SwapChain initialized
-[13:06:08][INFO] Initializing DescriptorHeap (type: 2, capacity: 3, shaderVisible: No)...
-[13:06:08][INFO] DescriptorHeap initialized (descriptor size: 32 bytes)
-[13:06:08][INFO] Initializing DescriptorHeap (type: 3, capacity: 1, shaderVisible: No)...
-[13:06:08][INFO] DescriptorHeap initialized (descriptor size: 8 bytes)
-[13:06:08][INFO] Initializing DescriptorHeap (type: 0, capacity: 10, shaderVisible: Yes)...
-[13:06:08][INFO] DescriptorHeap initialized (descriptor size: 32 bytes)
-[13:06:08][INFO] ? Descriptor heaps created
-[13:06:08][INFO] ? RTVs created
-[13:06:08][INFO] Depth stencil texture created: 1280x720
-[13:06:08][INFO] ? Depth buffer created
-[13:06:08][INFO] ? Command allocator and list created
-[13:06:08][INFO] UploadContext initialized
-[13:06:08][INFO] Texture created from memory: 256x256
-[13:06:08][INFO] Texture uploaded to GPU successfully
-[13:06:08][INFO] ? Checkerboard texture created: 256x256
-[13:06:08][INFO] ? Descriptors allocated:
-[13:06:08][INFO]   - CBV at index 0 (GPU: 0x25678A00110000)
-[13:06:08][INFO]   - SRV at index 1 (GPU: 0x25678A00110020)
-[13:06:08][INFO] ? Vertex data prepared:
-[13:06:08][INFO]   - Vertices: 24 (480 bytes)
-[13:06:08][INFO]   - Indices: 36 (144 bytes)
-[13:06:08][INFO] Buffer initialized (size: 480 bytes, type: 0)
-[13:06:08][INFO] Buffer initialized (size: 144 bytes, type: 1)
-[13:06:08][INFO] Buffer initialized (size: 256 bytes, type: 2)
-[13:06:08][INFO] ? Buffers created
-[13:06:08][INFO] ? CBV created (address: 0x878C000)
-[13:06:08][INFO] ? Texture SRV created
-[13:06:08][INFO] Compiling shaders...
-[13:06:08][INFO] ? Shader compiled: ../shaders/TexturedVS.hlsl
-[13:06:08][INFO] ? Shader compiled: ../shaders/TexturedPS.hlsl
-[13:06:08][INFO] ? Root signature created
-[13:06:08][INFO] ? Pipeline state created
-[13:06:08][INFO]   - Culling: DISABLED (両面描画)
-[13:06:08][INFO] ==========================================================
-[13:06:08][INFO]   初期化完了！レンダリングループ開始
-[13:06:08][INFO] ==========================================================
-[13:06:08][INFO] First frame MVP matrix:
-[13:06:08][INFO]   Row 0: [1.358, 0.000, -0.014, 0.000]
-[13:06:08][INFO]   Row 1: [0.008, 2.286, 0.775, 0.000]
-[13:06:08][INFO]   Row 2: [0.009, -0.321, 0.948, 3.065]
-[13:06:08][INFO]   Row 3: [0.009, -0.321, 0.947, 3.162]
-[13:06:08][INFO] ? DrawIndexedInstanced called (36 indices, 1 instance)
-[13:06:08][INFO] ? Frame 0 rendered
-[13:06:08][INFO] ? Frame 1 rendered
-[13:06:08][INFO] ? Frame 2 rendered
+[14:40:35][INFO] ===========================================
+[14:40:35][INFO] Athena Renderer - Log Started
+[14:40:35][INFO] ===========================================
+[14:40:35][INFO] ==========================================================
+[14:40:35][INFO]   Athena Renderer - Phase 4: Image File Loading
+[14:40:35][INFO] ==========================================================
+[14:40:35][INFO] ? Window created
+[14:40:35][INFO] Initializing Device...
+[14:40:35][INFO] D3D12 Debug Layer enabled
+[14:40:35][INFO] Selected GPU: NVIDIA GeForce GTX 1660 SUPER
+[14:40:35][INFO] VRAM: 5.83 GB
+[14:40:35][INFO] Feature Support:
+[14:40:35][INFO]   Mesh Shaders: Yes
+[14:40:35][INFO]   Raytracing: Yes
+[14:40:35][INFO]   VRS: Yes
+[14:40:35][INFO] Device initialized successfully
+[14:40:35][INFO] ? Device initialized
+[14:40:35][INFO] Initializing CommandQueue...
+[14:40:35][INFO] CommandQueue initialized successfully
+[14:40:35][INFO] ? CommandQueue initialized
+[14:40:35][INFO] Initializing SwapChain (1280x720)...
+[14:40:35][INFO] Created 3 back buffers
+[14:40:35][INFO] SwapChain initialized successfully
+[14:40:35][INFO] ? SwapChain initialized
+[14:40:35][INFO] Initializing DescriptorHeap (type: 2, capacity: 3, shaderVisible: No)...
+[14:40:35][INFO] DescriptorHeap initialized (descriptor size: 32 bytes)
+[14:40:35][INFO] Initializing DescriptorHeap (type: 3, capacity: 1, shaderVisible: No)...
+[14:40:35][INFO] DescriptorHeap initialized (descriptor size: 8 bytes)
+[14:40:35][INFO] Initializing DescriptorHeap (type: 0, capacity: 10, shaderVisible: Yes)...
+[14:40:35][INFO] DescriptorHeap initialized (descriptor size: 32 bytes)
+[14:40:35][INFO] ? Descriptor heaps created
+[14:40:35][INFO] ? RTVs created
+[14:40:35][INFO] Depth stencil texture created: 1280x720
+[14:40:35][INFO] ? Depth buffer created
+[14:40:35][INFO] ? Command allocator and list created
+[14:40:35][INFO] UploadContext initialized
+[14:40:35][INFO] ==========================================================
+[14:40:35][INFO]   Loading texture from file...
+[14:40:35][INFO] ==========================================================
+[14:40:35][INFO] Loading texture from file: ../assets/Sunamerikun.png
+[14:40:35][INFO]   Size: 1280x1280
+[14:40:35][INFO]   Format: 91
+[14:40:35][INFO]   Mip levels in file: 1
+[14:40:35][INFO]   Generating mipmaps...
+[14:40:36][INFO]   Generated 11 mip levels
+[14:40:36][INFO] ? Texture loaded successfully: ../assets/Sunamerikun.png
+[14:40:36][INFO] ? Texture loaded from file!
+[14:40:36][INFO] ? Descriptors allocated:
+[14:40:36][INFO]   - CBV at index 0
+[14:40:36][INFO]   - SRV at index 1
+[14:40:36][INFO] Buffer initialized (size: 480 bytes, type: 0)
+[14:40:36][INFO] Buffer initialized (size: 144 bytes, type: 1)
+[14:40:36][INFO] Buffer initialized (size: 256 bytes, type: 2)
+[14:40:36][INFO] ? Buffers created
+[14:40:36][INFO] ? CBV created
+[14:40:36][INFO] ? Texture SRV created
+[14:40:36][INFO] Compiling shaders...
+[14:40:36][INFO] ? Shader compiled: ../shaders/TexturedVS.hlsl
+[14:40:36][INFO] ? Shader compiled: ../shaders/TexturedPS.hlsl
+[14:40:36][INFO] ? Root signature created
+[14:40:36][INFO] ? Pipeline state created
+[14:40:36][INFO] ==========================================================
+[14:40:36][INFO]   初期化完了！レンダリングループ開始
+[14:40:36][INFO]   ESC: 終了
+[14:40:36][INFO] ==========================================================
+[14:40:38][INFO] ==========================================================
+[14:40:38][INFO]   終了処理開始
+[14:40:38][INFO] ==========================================================
+[14:40:38][INFO] Shutting down DescriptorHeap...
+[14:40:38][INFO] DescriptorHeap shut down successfully
+[14:40:38][INFO] Shutting down DescriptorHeap...
+[14:40:38][INFO] DescriptorHeap shut down successfully
+[14:40:38][INFO] Shutting down DescriptorHeap...
+[14:40:38][INFO] DescriptorHeap shut down successfully
+[14:40:38][INFO] Shutting down SwapChain...
+[14:40:38][INFO] SwapChain shut down successfully
+[14:40:38][INFO] Shutting down CommandQueue...
+[14:40:38][INFO] CommandQueue shut down successfully
+[14:40:38][INFO] Shutting down Device...
+[14:40:38][INFO] ? Shutdown complete
+[14:40:38][INFO] ===========================================
+[14:40:38][INFO] Athena Renderer - Log Ended
+[14:40:38][INFO] ===========================================

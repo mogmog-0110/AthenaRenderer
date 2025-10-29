@@ -67,7 +67,7 @@ bool CreateAppWindow(HINSTANCE hInstance) {
 
     g_hwnd = CreateWindow(
         wc.lpszClassName,
-        L"Athena Renderer - DEBUG MODE",
+        L"Athena Renderer - Phase 4: Image Loading",
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT,
         rect.right - rect.left,
@@ -110,34 +110,12 @@ ComPtr<ID3DBlob> CompileShader(const std::wstring& filepath, const std::string& 
     return shader;
 }
 
-// プロシージャルテクスチャ生成
-void CreateCheckerboardTexture(Texture& texture, ID3D12Device* device, UploadContext* uploadContext) {
-    const uint32_t width = 256;
-    const uint32_t height = 256;
-    const uint32_t gridSize = 8;
-
-    std::vector<uint32_t> pixels(width * height);
-
-    for (uint32_t y = 0; y < height; ++y) {
-        for (uint32_t x = 0; x < width; ++x) {
-            bool isWhite = ((x / (width / gridSize)) + (y / (height / gridSize))) % 2 == 0;
-            pixels[y * width + x] = isWhite ? 0xFFFFFFFF : 0xFF333333;
-        }
-    }
-
-    texture.CreateFromMemory(device, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, pixels.data());
-    texture.UploadToGPU(uploadContext);
-
-    Logger::Info("✓ Checkerboard texture created: %ux%u", width, height);
-}
-
 // メイン関数
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     try {
         Logger::Initialize();
         Logger::Info("==========================================================");
-        Logger::Info("  Athena Renderer - DEBUG MODE");
-        Logger::Info("  青い画面問題の診断を開始します");
+        Logger::Info("  Athena Renderer - Phase 4: Image File Loading");
         Logger::Info("==========================================================");
 
         // ウィンドウ作成
@@ -221,19 +199,62 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
         UploadContext uploadContext;
         uploadContext.Initialize(device.GetD3D12Device(), commandQueue.GetD3D12CommandQueue());
 
-        // テクスチャ作成
-        Texture checkerTexture;
-        CreateCheckerboardTexture(checkerTexture, device.GetD3D12Device(), &uploadContext);
+        // 🎨 画像ファイルからテクスチャ読み込み
+        Logger::Info("==========================================================");
+        Logger::Info("  Loading texture from file...");
+        Logger::Info("==========================================================");
 
-        // デスクリプタ割り当て（正しい順序で）
+        Texture mainTexture;
+
+        // テクスチャファイルのパス
+        // 例: ../assets/test_texture.png
+        const wchar_t* texturePath = L"../assets/Sunamerikun.png";
+
+        try {
+            mainTexture.LoadFromFile(
+                device.GetD3D12Device(),
+                texturePath,
+                &uploadContext,
+                true  // ミップマップ自動生成
+            );
+            Logger::Info("✓ Texture loaded from file!");
+        }
+        catch (const std::exception& e) {
+            Logger::Warning("Failed to load texture file: %s", e.what());
+            Logger::Info("Falling back to procedural checkerboard texture...");
+
+            // フォールバック: チェッカーボードテクスチャ
+            const uint32_t width = 256;
+            const uint32_t height = 256;
+            const uint32_t gridSize = 8;
+
+            std::vector<uint32_t> pixels(width * height);
+            for (uint32_t y = 0; y < height; ++y) {
+                for (uint32_t x = 0; x < width; ++x) {
+                    bool isWhite = ((x / (width / gridSize)) + (y / (height / gridSize))) % 2 == 0;
+                    pixels[y * width + x] = isWhite ? 0xFFFFFFFF : 0xFF333333;
+                }
+            }
+
+            mainTexture.CreateFromMemory(
+                device.GetD3D12Device(),
+                width, height,
+                DXGI_FORMAT_R8G8B8A8_UNORM,
+                pixels.data()
+            );
+            mainTexture.UploadToGPU(&uploadContext);
+            Logger::Info("✓ Fallback texture created");
+        }
+
+        // デスクリプタ割り当て
         auto cbvHandle = cbvSrvHeap.Allocate();
         auto textureSrvHandle = cbvSrvHeap.Allocate();
 
         Logger::Info("✓ Descriptors allocated:");
-        Logger::Info("  - CBV at index %u (GPU: 0x%llX)", cbvHandle.index, cbvHandle.gpu.ptr);
-        Logger::Info("  - SRV at index %u (GPU: 0x%llX)", textureSrvHandle.index, textureSrvHandle.gpu.ptr);
+        Logger::Info("  - CBV at index %u", cbvHandle.index);
+        Logger::Info("  - SRV at index %u", textureSrvHandle.index);
 
-        // 頂点データ（簡単なキューブ）
+        // 頂点データ
         Vertex vertices[] = {
             // 前面
             {{-0.5f, -0.5f,  0.5f}, 0.0f, 1.0f},
@@ -276,10 +297,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
             20, 21, 22, 20, 22, 23, // 左面
         };
 
-        Logger::Info("✓ Vertex data prepared:");
-        Logger::Info("  - Vertices: %zu (%zu bytes)", sizeof(vertices) / sizeof(Vertex), sizeof(vertices));
-        Logger::Info("  - Indices: %zu (%zu bytes)", sizeof(indices) / sizeof(uint32_t), sizeof(indices));
-
         // バッファ作成
         Buffer vertexBuffer;
         vertexBuffer.Initialize(
@@ -313,10 +330,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
         cbvDesc.BufferLocation = constantBuffer.GetGPUVirtualAddress();
         cbvDesc.SizeInBytes = 256;
         device.GetD3D12Device()->CreateConstantBufferView(&cbvDesc, cbvHandle.cpu);
-        Logger::Info("✓ CBV created (address: 0x%llX)", cbvDesc.BufferLocation);
+        Logger::Info("✓ CBV created");
 
         // SRV作成
-        checkerTexture.CreateSRV(device.GetD3D12Device(), textureSrvHandle.cpu);
+        mainTexture.CreateSRV(device.GetD3D12Device(), textureSrvHandle.cpu);
         Logger::Info("✓ Texture SRV created");
 
         // シェーダーコンパイル
@@ -396,7 +413,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
         psoDesc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
         psoDesc.SampleMask = UINT_MAX;
         psoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
-        psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;  // 両面描画（デバッグ用）
+        psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
         psoDesc.RasterizerState.FrontCounterClockwise = FALSE;
         psoDesc.RasterizerState.DepthClipEnable = TRUE;
         psoDesc.DepthStencilState.DepthEnable = TRUE;
@@ -415,16 +432,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
             throw std::runtime_error("Failed to create pipeline state");
         }
         Logger::Info("✓ Pipeline state created");
-        Logger::Info("  - Culling: DISABLED (両面描画)");
 
         Logger::Info("==========================================================");
         Logger::Info("  初期化完了！レンダリングループ開始");
+        Logger::Info("  ESC: 終了");
         Logger::Info("==========================================================");
 
         // メインループ
         MSG msg = {};
         float rotation = 0.0f;
-        int frameCount = 0;
+
 
         while (msg.message != WM_QUIT) {
             if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
@@ -438,28 +455,22 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
             Matrix4x4 world = Matrix4x4::RotationY(rotation) * Matrix4x4::RotationX(rotation * 0.5f);
             Matrix4x4 view = Matrix4x4::LookAt(
-                Vector3(0.0f, 1.0f, -3.0f),  // カメラ位置
-                Vector3(0.0f, 0.0f, 0.0f),   // 注視点
-                Vector3(0.0f, 1.0f, 0.0f)    // 上方向
+                Vector3(0.0f, 1.0f, -3.0f),
+                Vector3(0.0f, 0.0f, 0.0f),
+                Vector3(0.0f, 1.0f, 0.0f)
             );
             Matrix4x4 proj = Matrix4x4::Perspective(
-                3.14159f / 4.0f,  // 45度
+                3.14159f / 4.0f,
                 static_cast<float>(WINDOW_WIDTH) / WINDOW_HEIGHT,
-                0.1f,   // Near
-                100.0f  // Far
+                0.1f,
+                100.0f
             );
 
-            Matrix4x4 mvp = world * view * proj;
-            mvp = mvp.Transpose();
+           /* Matrix4x4 mvp = proj * view * world;
+            mvp = mvp.Transpose();*/
 
-            // 最初のフレームでMVP行列の値をログ出力
-            if (frameCount == 0) {
-                Logger::Info("First frame MVP matrix:");
-                Logger::Info("  Row 0: [%.3f, %.3f, %.3f, %.3f]", mvp.m[0][0], mvp.m[0][1], mvp.m[0][2], mvp.m[0][3]);
-                Logger::Info("  Row 1: [%.3f, %.3f, %.3f, %.3f]", mvp.m[1][0], mvp.m[1][1], mvp.m[1][2], mvp.m[1][3]);
-                Logger::Info("  Row 2: [%.3f, %.3f, %.3f, %.3f]", mvp.m[2][0], mvp.m[2][1], mvp.m[2][2], mvp.m[2][3]);
-                Logger::Info("  Row 3: [%.3f, %.3f, %.3f, %.3f]", mvp.m[3][0], mvp.m[3][1], mvp.m[3][2], mvp.m[3][3]);
-            }
+            Matrix4x4 mvp = world * view * proj;
+			mvp = mvp.Transpose();
 
             TransformBuffer cbData = {};
             cbData.mvp = mvp;
@@ -469,7 +480,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
             commandAllocator->Reset();
             commandList->Reset(commandAllocator.Get(), pipelineState.Get());
 
-            // ビューポート
             D3D12_VIEWPORT viewport = {};
             viewport.Width = static_cast<float>(WINDOW_WIDTH);
             viewport.Height = static_cast<float>(WINDOW_HEIGHT);
@@ -479,7 +489,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
             D3D12_RECT scissorRect = { 0, 0, static_cast<LONG>(WINDOW_WIDTH), static_cast<LONG>(WINDOW_HEIGHT) };
             commandList->RSSetScissorRects(1, &scissorRect);
 
-            // バリア: PRESENT → RENDER_TARGET
             uint32_t backBufferIndex = swapChain.GetCurrentBackBufferIndex();
             D3D12_RESOURCE_BARRIER barrier = {};
             barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -489,17 +498,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
             barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
             commandList->ResourceBarrier(1, &barrier);
 
-            // レンダーターゲット設定
             D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap.GetD3D12DescriptorHeap()->GetCPUDescriptorHandleForHeapStart();
             rtvHandle.ptr += backBufferIndex * rtvHeap.GetDescriptorSize();
             commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle.cpu);
 
-            // クリア
             const float clearColor[] = { 0.1f, 0.2f, 0.4f, 1.0f };
             commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
             commandList->ClearDepthStencilView(dsvHandle.cpu, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-            // 描画設定
             commandList->SetGraphicsRootSignature(rootSignature.Get());
 
             ID3D12DescriptorHeap* heaps[] = { cbvSrvHeap.GetD3D12DescriptorHeap() };
@@ -516,53 +522,49 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
             commandList->IASetVertexBuffers(0, 1, &vbv);
             commandList->IASetIndexBuffer(&ibv);
 
-            // 描画コール
             commandList->DrawIndexedInstanced(36, 1, 0, 0, 0);
 
-            if (frameCount == 0) {
-                Logger::Info("✓ DrawIndexedInstanced called (36 indices, 1 instance)");
-            }
-
-            // バリア: RENDER_TARGET → PRESENT
             barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
             barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
             commandList->ResourceBarrier(1, &barrier);
 
             commandList->Close();
 
-            // 実行
             ID3D12CommandList* cmdLists[] = { commandList.Get() };
             commandQueue.ExecuteCommandLists(cmdLists, 1);
 
-            // プレゼント
             swapChain.Present(true);
-
-            // GPU待機
             commandQueue.WaitForGPU();
-
-            if (frameCount < 3) {
-                Logger::Info("✓ Frame %d rendered", frameCount);
-            }
-            frameCount++;
         }
 
         // 終了
         Logger::Info("==========================================================");
         Logger::Info("  終了処理開始");
         Logger::Info("==========================================================");
-        commandQueue.WaitForGPU();
+		commandQueue.WaitForGPU(); // GPUの処理完了を待機
 
+        // UploadContext解放
+        uploadContext.Shutdown();
+
+        // リソース解放（バッファ・テクスチャ）
         constantBuffer.Shutdown();
         indexBuffer.Shutdown();
         vertexBuffer.Shutdown();
-        checkerTexture.Shutdown();
+        mainTexture.Shutdown();
         depthTexture.Shutdown();
-        uploadContext.Shutdown();
+
+        // デスクリプタヒープ解放
         cbvSrvHeap.Shutdown();
         dsvHeap.Shutdown();
         rtvHeap.Shutdown();
+
+        // スワップチェーン解放
         swapChain.Shutdown();
+
+        // CommandQueue解放
         commandQueue.Shutdown();
+
+        // Device解放
         device.Shutdown();
 
         Logger::Info("✓ Shutdown complete");

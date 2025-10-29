@@ -36,17 +36,18 @@ namespace Athena {
         ~Texture();
 
         /**
-         * @brief 画像ファイルからテクスチャを作成
+         * @brief 画像ファイルから読み込み（NEW!）
          * @param device DirectX 12デバイス
-         * @param filepath 画像ファイルパス（PNG, JPG, TGA, BMP, DDS, HDR等）
-         *
-         * DirectXTexを使用して様々な形式に対応：
-         * - WIC: PNG, JPG, BMP, GIF, TIFF等
-         * - DDS: DirectDraw Surface
-         * - TGA: Targa
-         * - HDR: High Dynamic Range
+         * @param filepath 画像ファイルパス（.png, .jpg, .dds等）
+         * @param uploadContext アップロードコンテキスト
+         * @param generateMips ミップマップを自動生成するか
          */
-        void LoadFromFile(ID3D12Device* device, const std::string& filepath);
+        void LoadFromFile(
+            ID3D12Device* device,
+            const wchar_t* filepath,
+            UploadContext* uploadContext,
+            bool generateMips = true
+        );
 
         /**
          * @brief GPUにテクスチャをアップロード
@@ -132,6 +133,7 @@ namespace Athena {
         uint32_t height = 0;
         DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN;
         TextureType type = TextureType::Texture2D;
+        uint32_t mipLevels = 1;
 
         // DirectXTexの一時画像データ（アップロード前）
         DirectX::ScratchImage tempImageData;

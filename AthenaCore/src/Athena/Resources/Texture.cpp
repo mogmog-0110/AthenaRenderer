@@ -1,8 +1,9 @@
-#include "Athena/Resources/Texture.h"
+ï»¿#include "Athena/Resources/Texture.h"
 #include "Athena/Resources/UploadContext.h"
 #include "Athena/Utils/Logger.h"
 #include <DirectXTex.h>
 #include <stdexcept>
+#include <algorithm>
 
 namespace Athena {
 
@@ -12,103 +13,135 @@ namespace Athena {
         Shutdown();
     }
 
-    void Texture::LoadFromFile(ID3D12Device* device, const std::string& filepath) {
-        Logger::Info("Loading texture: %s", filepath.c_str());
+    void Texture::LoadFromFile(
+        ID3D12Device* device,
+        const wchar_t* filepath,
+        UploadContext* uploadContext,
+        bool generateMips) {
 
-        // std::string ¨ std::wstring ‚É•ÏŠ·
-        std::wstring wfilepath(filepath.begin(), filepath.end());
+        Logger::Info("Loading texture from file: %S", filepath);
 
-        // DirectXTex‚Å‰æ‘œ‚ğ“Ç‚İ‚İ
-        DirectX::TexMetadata metadata;
-        DirectX::ScratchImage image;
+        // DirectXTexã‚’ä½¿ã£ã¦ç”»åƒã‚’èª­ã¿è¾¼ã¿
+        DirectX::ScratchImage scratchImage;
         HRESULT hr;
 
-        // Šg’£q‚ğæ“¾
-        std::wstring ext = wfilepath.substr(wfilepath.find_last_of(L".") + 1);
+        // ãƒ•ã‚¡ã‚¤ãƒ«æ‹¡å¼µå­ã‹ã‚‰èª­ã¿è¾¼ã¿æ–¹æ³•ã‚’åˆ¤å®š
+        std::wstring path(filepath);
+        std::wstring ext = path.substr(path.find_last_of(L'.'));
+        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
 
-        // Šg’£q‚É‰‚¶‚½“Ç‚İ‚İ
-        if (ext == L"dds" || ext == L"DDS") {
-            hr = DirectX::LoadFromDDSFile(
-                wfilepath.c_str(),
-                DirectX::DDS_FLAGS_NONE,
-                &metadata,
-                image
-            );
+        if (ext == L".dds") {
+            // DDSå½¢å¼
+            hr = DirectX::LoadFromDDSFile(filepath, DirectX::DDS_FLAGS_NONE, nullptr, scratchImage);
         }
-        else if (ext == L"tga" || ext == L"TGA") {
-            hr = DirectX::LoadFromTGAFile(
-                wfilepath.c_str(),
-                &metadata,
-                image
-            );
+        else if (ext == L".tga") {
+            // TGAå½¢å¼
+            hr = DirectX::LoadFromTGAFile(filepath, nullptr, scratchImage);
         }
-        else if (ext == L"hdr" || ext == L"HDR") {
-            hr = DirectX::LoadFromHDRFile(
-                wfilepath.c_str(),
-                &metadata,
-                image
-            );
+        else if (ext == L".hdr") {
+            // HDRå½¢å¼
+            hr = DirectX::LoadFromHDRFile(filepath, nullptr, scratchImage);
         }
         else {
-            // PNG, JPG, BMP“™‚ÍWIC (Windows Imaging Component) ‚Å“Ç‚İ‚İ
-            hr = DirectX::LoadFromWICFile(
-                wfilepath.c_str(),
-                DirectX::WIC_FLAGS_NONE,
-                &metadata,
-                image
-            );
+            // WICå½¢å¼ï¼ˆPNG, JPG, BMPç­‰ï¼‰
+            hr = DirectX::LoadFromWICFile(filepath, DirectX::WIC_FLAGS_NONE, nullptr, scratchImage);
         }
 
         if (FAILED(hr)) {
-            Logger::Error("Failed to load texture: %s (HRESULT: 0x%08X)", filepath.c_str(), hr);
-            throw std::runtime_error("Failed to load texture: " + filepath);
+            Logger::Error("Failed to load texture file: %S", filepath);
+            throw std::runtime_error("Failed to load texture file");
         }
 
-        this->width = static_cast<uint32_t>(metadata.width);
-        this->height = static_cast<uint32_t>(metadata.height);
-        this->format = metadata.format;
-        this->type = TextureType::Texture2D;
+        // ãƒ¡ã‚¿ãƒ‡ãƒ¼ã‚¿å–å¾—
+        const DirectX::TexMetadata& metadata = scratchImage.GetMetadata();
+        width = static_cast<uint32_t>(metadata.width);
+        height = static_cast<uint32_t>(metadata.height);
+        format = metadata.format;
 
-        Logger::Info("Texture info: %dx%d, format: %d, mipLevels: %zu",
-            this->width, this->height, this->format, metadata.mipLevels);
+        Logger::Info("  Size: %ux%u", width, height);
+        Logger::Info("  Format: %d", format);
+        Logger::Info("  Mip levels in file: %zu", metadata.mipLevels);
 
-        // ƒeƒNƒXƒ`ƒƒƒŠƒ\[ƒXì¬iCOPY_DESTó‘Ô‚Åì¬j
-        CreateResource(
-            device,
-            this->width,
-            this->height,
-            this->format,
-            D3D12_RESOURCE_FLAG_NONE,
-            D3D12_RESOURCE_STATE_COPY_DEST,
-            nullptr
+        // ãƒŸãƒƒãƒ—ãƒãƒƒãƒ—ç”Ÿæˆ
+        DirectX::ScratchImage mipChain;
+        if (generateMips && metadata.mipLevels == 1) {
+            Logger::Info("  Generating mipmaps...");
+            hr = DirectX::GenerateMipMaps(
+                scratchImage.GetImages(),
+                scratchImage.GetImageCount(),
+                scratchImage.GetMetadata(),
+                DirectX::TEX_FILTER_DEFAULT,
+                0, // ã™ã¹ã¦ã®ãƒŸãƒƒãƒ—ãƒ¬ãƒ™ãƒ«ã‚’ç”Ÿæˆ
+                mipChain
+            );
+
+            if (SUCCEEDED(hr)) {
+                scratchImage = std::move(mipChain);
+                mipLevels = static_cast<uint32_t>(scratchImage.GetMetadata().mipLevels);
+                Logger::Info("  Generated %u mip levels", mipLevels);
+            }
+            else {
+                Logger::Warning("  Failed to generate mipmaps, using original image");
+                mipLevels = 1;
+            }
+        }
+        else {
+            mipLevels = static_cast<uint32_t>(metadata.mipLevels);
+        }
+
+        // D3D12ãƒªã‚½ãƒ¼ã‚¹ã‚’ä½œæˆ
+        D3D12_RESOURCE_DESC textureDesc = {};
+        textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+        textureDesc.Width = width;
+        textureDesc.Height = height;
+        textureDesc.DepthOrArraySize = 1;
+        textureDesc.MipLevels = static_cast<UINT16>(mipLevels);
+        textureDesc.Format = format;
+        textureDesc.SampleDesc.Count = 1;
+        textureDesc.SampleDesc.Quality = 0;
+        textureDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+        textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+        D3D12_HEAP_PROPERTIES heapProps = {};
+        heapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
+
+        hr = device->CreateCommittedResource(
+            &heapProps,
+            D3D12_HEAP_FLAG_NONE,
+            &textureDesc,
+            D3D12_RESOURCE_STATE_COPY_DEST, // åˆæœŸçŠ¶æ…‹ã¯ã‚³ãƒ”ãƒ¼å…ˆ
+            nullptr,
+            IID_PPV_ARGS(&resource)
         );
 
-        // ƒTƒuƒŠƒ\[ƒXƒf[ƒ^‚Ì€”õ
-        std::vector<D3D12_SUBRESOURCE_DATA> subresources;
-        for (size_t i = 0; i < image.GetImageCount(); ++i) {
-            const DirectX::Image* img = image.GetImage(0, i, 0);
-            D3D12_SUBRESOURCE_DATA subresource = {};
-            subresource.pData = img->pixels;
-            subresource.RowPitch = img->rowPitch;
-            subresource.SlicePitch = img->slicePitch;
-            subresources.push_back(subresource);
+        if (FAILED(hr)) {
+            throw std::runtime_error("Failed to create texture resource");
         }
 
-        // UploadContext‚ğg‚Á‚ÄGPU‚ÉƒAƒbƒvƒ[ƒh
-        // ’ˆÓ: ‚±‚ÌÀ‘•‚Å‚ÍUploadContext‚ğ‚±‚±‚Åì¬Eg—p‚µ‚Ä‚¢‚Ü‚·‚ªA
-        // –{—ˆ‚ÍŠO•”‚©‚ç“n‚³‚ê‚é‚×‚«‚Å‚·iŸ‚ÌƒŠƒtƒ@ƒNƒ^ƒŠƒ“ƒO‚Å‰ü‘Pj
+        // ã‚µãƒ–ãƒªã‚½ãƒ¼ã‚¹ãƒ‡ãƒ¼ã‚¿ã‚’æº–å‚™
+        std::vector<D3D12_SUBRESOURCE_DATA> subresources(mipLevels);
+        const DirectX::Image* images = scratchImage.GetImages();
 
-        // ˆê“I‚ÈÀ‘•FŒã‚ÅŠO•”‚©‚ç“n‚·‚æ‚¤‚É•ÏX
-        // uploadContext->Begin();
-        // uploadContext->UploadTexture(resource.Get(), subresources.data(), subresources.size());
-        // uploadContext->TransitionResource(resource.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-        // uploadContext->End();
+        for (uint32_t i = 0; i < mipLevels; ++i) {
+            subresources[i].pData = images[i].pixels;
+            subresources[i].RowPitch = images[i].rowPitch;
+            subresources[i].SlicePitch = images[i].slicePitch;
+        }
 
-        Logger::Info("Texture loaded successfully: %s", filepath.c_str());
-        Logger::Warning("Texture upload requires UploadContext (call UploadToGPU separately)");
+        // GPUã«ã‚¢ãƒƒãƒ—ãƒ­ãƒ¼ãƒ‰
+        uploadContext->Begin();
+        uploadContext->UploadTexture(resource.Get(), subresources.data(), mipLevels);
 
-        // ‰æ‘œƒf[ƒ^‚ğˆê•Û‘¶iUploadToGPU—pj
-        tempImageData = std::move(image);
+        // COPY_DEST â†’ PIXEL_SHADER_RESOURCE ã«é·ç§»
+        uploadContext->TransitionResource(
+            resource.Get(),
+            D3D12_RESOURCE_STATE_COPY_DEST,
+            D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+        );
+
+        uploadContext->End();
+
+        Logger::Info("âœ“ Texture loaded successfully: %S", filepath);
     }
 
     void Texture::UploadToGPU(UploadContext* uploadContext) {
@@ -117,7 +150,7 @@ namespace Athena {
             return;
         }
 
-        // ƒTƒuƒŠƒ\[ƒXƒf[ƒ^‚Ì€”õ
+        // ã‚µãƒ–ãƒªã‚½ãƒ¼ã‚¹ãƒ‡ãƒ¼ã‚¿ã®æº–å‚™
         std::vector<D3D12_SUBRESOURCE_DATA> subresources;
         for (size_t i = 0; i < tempImageData.GetImageCount(); ++i) {
             const DirectX::Image* img = tempImageData.GetImage(0, i, 0);
@@ -128,27 +161,27 @@ namespace Athena {
             subresources.push_back(subresource);
         }
 
-        // ƒAƒbƒvƒ[ƒhŠJn
+        // ã‚¢ãƒƒãƒ—ãƒ­ãƒ¼ãƒ‰é–‹å§‹
         uploadContext->Begin();
 
-        // ƒeƒNƒXƒ`ƒƒƒf[ƒ^‚ğƒAƒbƒvƒ[ƒh
+        // ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ‡ãƒ¼ã‚¿ã‚’ã‚¢ãƒƒãƒ—ãƒ­ãƒ¼ãƒ‰
         uploadContext->UploadTexture(
             resource.Get(),
             subresources.data(),
             static_cast<uint32_t>(subresources.size())
         );
 
-        // ƒŠƒ\[ƒXƒoƒŠƒA: COPY_DEST ¨ PIXEL_SHADER_RESOURCE
+        // ãƒªã‚½ãƒ¼ã‚¹ãƒãƒªã‚¢: COPY_DEST â†’ PIXEL_SHADER_RESOURCE
         uploadContext->TransitionResource(
             resource.Get(),
             D3D12_RESOURCE_STATE_COPY_DEST,
             D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
         );
 
-        // ƒAƒbƒvƒ[ƒhŠ®—¹‚ğ‘Ò‹@
+        // ã‚¢ãƒƒãƒ—ãƒ­ãƒ¼ãƒ‰å®Œäº†ã‚’å¾…æ©Ÿ
         uploadContext->End();
 
-        // ˆêƒf[ƒ^‚ğƒNƒŠƒA
+        // ä¸€æ™‚ãƒ‡ãƒ¼ã‚¿ã‚’ã‚¯ãƒªã‚¢
         tempImageData.Release();
 
         Logger::Info("Texture uploaded to GPU successfully");
@@ -176,18 +209,18 @@ namespace Athena {
             nullptr
         );
 
-        // DirectXTex‚ÌScratchImage‚ğì¬
+        // DirectXTexã®ScratchImageã‚’ä½œæˆ
         DirectX::ScratchImage image;
         HRESULT hr = image.Initialize2D(format, width, height, 1, 1);
         if (FAILED(hr)) {
             throw std::runtime_error("Failed to initialize ScratchImage");
         }
 
-        // ƒf[ƒ^‚ğƒRƒs[
+        // ãƒ‡ãƒ¼ã‚¿ã‚’ã‚³ãƒ”ãƒ¼
         const DirectX::Image* img = image.GetImage(0, 0, 0);
         memcpy(img->pixels, data, img->slicePitch);
 
-        // ˆê•Û‘¶
+        // ä¸€æ™‚ä¿å­˜
         tempImageData = std::move(image);
 
         Logger::Info("Texture created from memory: %dx%d", width, height);
