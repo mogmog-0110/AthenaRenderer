@@ -20,12 +20,12 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <WarningLevel>Level4</WarningLevel>
       <AdditionalIncludeDirectories>
-        $(AthenaIncludeDir);
-        $(ExternalDir)\imgui;
-        $(ExternalDir)\imgui\backends;
-        $(ExternalDir)\stb;
-        %(AdditionalIncludeDirectories)
-      </AdditionalIncludeDirectories>
+		  $(AthenaIncludeDir);
+		  $(ExternalDir)\imgui;
+		  $(ExternalDir)\imgui\backends;
+		  $(ExternalDir)\stb;
+		  %(AdditionalIncludeDirectories)
+	  </AdditionalIncludeDirectories>
       <PreprocessorDefinitions>
         WIN32;
         _WINDOWS;
