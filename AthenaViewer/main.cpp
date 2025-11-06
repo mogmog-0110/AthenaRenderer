@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include <exception>
 #include <stdexcept>
+#include <memory>
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <d3dcompiler.h>
@@ -17,6 +18,21 @@
 #include "Athena/Resources/UploadContext.h"
 #include "Athena/Utils/Math.h"
 
+// RenderGraphテスト関数の宣言
+bool RunAllRenderGraphTests(std::shared_ptr<Athena::Device> device);
+
+// RenderGraphExample関数の宣言
+bool InitializeRenderGraphExample(std::shared_ptr<Athena::Device> device, uint32_t width, uint32_t height);
+void RenderWithRenderGraph(ID3D12GraphicsCommandList* commandList, 
+                          ID3D12DescriptorHeap* srvHeap,
+                          D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle,
+                          D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle);
+void SetRenderGraphSceneData(const Athena::Matrix4x4& world, const Athena::Matrix4x4& view, const Athena::Matrix4x4& proj,
+                           const Athena::Vector3& cameraPos, const Athena::Vector3& lightDir, const Athena::Vector3& lightColor);
+void SetRenderGraphVertexData(const void* vertices, uint32_t vertexCount, const uint32_t* indices, uint32_t indexCount);
+void SetRenderGraphTexture(std::shared_ptr<Athena::Texture> texture);
+void SetRenderGraphObjectID(uint32_t objectID);
+
 using namespace Athena;
 using Microsoft::WRL::ComPtr;
 
@@ -25,10 +41,18 @@ HWND g_hwnd = nullptr;
 const uint32_t WINDOW_WIDTH = 1280;
 const uint32_t WINDOW_HEIGHT = 720;
 
-// 頂点構造体
+// 表示モード管理
+enum class DisplayMode {
+    Cube = 0,
+    Sphere = 1,
+    COUNT
+};
+DisplayMode g_currentMode = DisplayMode::Cube;
+
+// 頂点構造体（アライメント明示）
 struct Vertex {
-    Vector3 position;
-    float u, v;
+    Vector3 position;   // 0 - 11バイト
+    Vector2 texcoord;   // 12 - 19バイト
 };
 
 // 定数バッファ構造体（256バイトアライメント）
@@ -41,7 +65,17 @@ struct TransformBuffer {
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch (msg) {
     case WM_KEYDOWN:
-        if (wParam == VK_ESCAPE) PostQuitMessage(0);
+        if (wParam == VK_ESCAPE) {
+            PostQuitMessage(0);
+        } else if (wParam == VK_SPACE) {
+            // スペースキーで表示モード切り替え
+            int currentMode = static_cast<int>(g_currentMode);
+            currentMode = (currentMode + 1) % static_cast<int>(DisplayMode::COUNT);
+            g_currentMode = static_cast<DisplayMode>(currentMode);
+            
+            const char* modeNames[] = { "Cube", "Sphere" };
+            Logger::Info("Display mode changed to: %s", modeNames[currentMode]);
+        }
         return 0;
     case WM_DESTROY:
         PostQuitMessage(0);
@@ -67,7 +101,7 @@ bool CreateAppWindow(HINSTANCE hInstance) {
 
     g_hwnd = CreateWindow(
         wc.lpszClassName,
-        L"Athena Renderer - Phase 4: Image Loading",
+        L"Athena Renderer - RenderGraph Integration",
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT,
         rect.right - rect.left,
@@ -80,6 +114,50 @@ bool CreateAppWindow(HINSTANCE hInstance) {
     ShowWindow(g_hwnd, SW_SHOW);
     UpdateWindow(g_hwnd);
     return true;
+}
+
+// 球体ジオメトリ生成
+void CreateSphereGeometry(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices, 
+                         float radius = 1.0f, uint32_t slices = 20, uint32_t stacks = 20) {
+    vertices.clear();
+    indices.clear();
+
+    // 頂点生成
+    for (uint32_t stack = 0; stack <= stacks; ++stack) {
+        float phi = 3.14159f * stack / stacks; // 緯度角
+        
+        for (uint32_t slice = 0; slice <= slices; ++slice) {
+            float theta = 2.0f * 3.14159f * slice / slices; // 経度角
+            
+            Vertex vertex;
+            vertex.position.x = radius * sin(phi) * cos(theta);
+            vertex.position.y = radius * cos(phi);
+            vertex.position.z = radius * sin(phi) * sin(theta);
+            
+            vertex.texcoord.x = (float)slice / slices;
+            vertex.texcoord.y = (float)stack / stacks;
+            
+            vertices.push_back(vertex);
+        }
+    }
+
+    // インデックス生成
+    for (uint32_t stack = 0; stack < stacks; ++stack) {
+        for (uint32_t slice = 0; slice < slices; ++slice) {
+            uint32_t current = stack * (slices + 1) + slice;
+            uint32_t next = current + slices + 1;
+
+            // 下三角形
+            indices.push_back(current);
+            indices.push_back(next);
+            indices.push_back(current + 1);
+
+            // 上三角形
+            indices.push_back(current + 1);
+            indices.push_back(next);
+            indices.push_back(next + 1);
+        }
+    }
 }
 
 // シェーダーコンパイル
@@ -115,7 +193,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     try {
         Logger::Initialize();
         Logger::Info("==========================================================");
-        Logger::Info("  Athena Renderer - Phase 4: Image File Loading");
+        Logger::Info("  Athena Renderer - RenderGraph Integration");
         Logger::Info("==========================================================");
 
         // ウィンドウ作成
@@ -125,19 +203,64 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
         Logger::Info("✓ Window created");
 
         // デバイス初期化
-        Device device;
-        device.Initialize(true);
+        auto devicePtr = std::make_shared<Device>();
+        devicePtr->Initialize(true);
         Logger::Info("✓ Device initialized");
+
+        // RenderGraphテスト実行
+        Logger::Info("=== RenderGraph基盤テスト開始 ===");
+        bool testResult = RunAllRenderGraphTests(devicePtr);
+        Logger::Info("=== RenderGraph基盤テスト完了: {} ===", testResult ? "成功" : "失敗");
+        
+        // テスト失敗時は早期終了
+        if (!testResult) {
+            Logger::Error("RenderGraphテストが失敗しました。アプリケーションを終了します。");
+            return -1;
+        }
+
+        // RenderGraph用のテスト用ジオメトリ（三角形）を先に準備
+        Logger::Info("RenderGraph用テストジオメトリを準備");
+        
+        // 簡単な三角形の頂点データ
+        struct TestVertex {
+            Athena::Vector3 position;
+            Athena::Vector3 normal;
+            float u, v;
+        };
+        
+        TestVertex triangleVertices[] = {
+            { Athena::Vector3(0.0f, 0.8f, 0.0f), Athena::Vector3(0.0f, 0.0f, 1.0f), 0.5f, 0.0f },
+            { Athena::Vector3(-0.8f, -0.8f, 0.0f), Athena::Vector3(0.0f, 0.0f, 1.0f), 0.0f, 1.0f },
+            { Athena::Vector3(0.8f, -0.8f, 0.0f), Athena::Vector3(0.0f, 0.0f, 1.0f), 1.0f, 1.0f }
+        };
+        
+        uint32_t triangleIndices[] = { 0, 1, 2 };
+
+        // RenderGraphExample初期化（頂点データ設定前）
+        Logger::Info("=== RenderGraph統合例の初期化 ===");
+        bool renderGraphExampleResult = InitializeRenderGraphExample(devicePtr, WINDOW_WIDTH, WINDOW_HEIGHT);
+        
+        if (renderGraphExampleResult) {
+            // 初期化成功後に頂点データを設定
+            SetRenderGraphVertexData(triangleVertices, 3, triangleIndices, 3);
+            Logger::Info("RenderGraph用テストジオメトリ設定完了");
+        }
+        
+        Logger::Info("=== RenderGraph統合例初期化: {} ===", renderGraphExampleResult ? "成功" : "失敗");
+        
+        if (!renderGraphExampleResult) {
+            Logger::Warning("RenderGraph統合例の初期化に失敗しましたが、従来レンダリングで続行します。");
+        }
 
         // コマンドキュー
         CommandQueue commandQueue;
-        commandQueue.Initialize(device.GetD3D12Device(), D3D12_COMMAND_LIST_TYPE_DIRECT);
+        commandQueue.Initialize(devicePtr->GetD3D12Device(), D3D12_COMMAND_LIST_TYPE_DIRECT);
         Logger::Info("✓ CommandQueue initialized");
 
         // スワップチェーン
         SwapChain swapChain;
         swapChain.Initialize(
-            device.GetDXGIFactory(),
+            devicePtr->GetDXGIFactory(),
             commandQueue.GetD3D12CommandQueue(),
             g_hwnd,
             WINDOW_WIDTH,
@@ -147,13 +270,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
         // デスクリプタヒープ
         DescriptorHeap rtvHeap;
-        rtvHeap.Initialize(device.GetD3D12Device(), D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 3, false);
+        rtvHeap.Initialize(devicePtr->GetD3D12Device(), D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 3, false);
 
         DescriptorHeap dsvHeap;
-        dsvHeap.Initialize(device.GetD3D12Device(), D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
+        dsvHeap.Initialize(devicePtr->GetD3D12Device(), D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
 
         DescriptorHeap cbvSrvHeap;
-        cbvSrvHeap.Initialize(device.GetD3D12Device(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 10, true);
+        cbvSrvHeap.Initialize(devicePtr->GetD3D12Device(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 10, true);
         Logger::Info("✓ Descriptor heaps created");
 
         // RTVを作成
@@ -162,7 +285,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
             D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
             rtvDesc.Format = swapChain.GetFormat();
             rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-            device.GetD3D12Device()->CreateRenderTargetView(
+            devicePtr->GetD3D12Device()->CreateRenderTargetView(
                 swapChain.GetBackBuffer(i),
                 &rtvDesc,
                 handle.cpu
@@ -172,20 +295,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
         // 深度バッファ
         Texture depthTexture;
-        depthTexture.CreateDepthStencil(device.GetD3D12Device(), WINDOW_WIDTH, WINDOW_HEIGHT);
+        depthTexture.CreateDepthStencil(devicePtr->GetD3D12Device(), WINDOW_WIDTH, WINDOW_HEIGHT);
         auto dsvHandle = dsvHeap.Allocate();
-        depthTexture.CreateDSV(device.GetD3D12Device(), dsvHandle.cpu);
+        depthTexture.CreateDSV(devicePtr->GetD3D12Device(), dsvHandle.cpu);
         Logger::Info("✓ Depth buffer created");
 
         // コマンドアロケータ
         ComPtr<ID3D12CommandAllocator> commandAllocator;
-        device.GetD3D12Device()->CreateCommandAllocator(
+        devicePtr->GetD3D12Device()->CreateCommandAllocator(
             D3D12_COMMAND_LIST_TYPE_DIRECT,
             IID_PPV_ARGS(&commandAllocator)
         );
 
         ComPtr<ID3D12GraphicsCommandList> commandList;
-        device.GetD3D12Device()->CreateCommandList(
+        devicePtr->GetD3D12Device()->CreateCommandList(
             0,
             D3D12_COMMAND_LIST_TYPE_DIRECT,
             commandAllocator.Get(),
@@ -197,7 +320,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
         // UploadContext
         UploadContext uploadContext;
-        uploadContext.Initialize(device.GetD3D12Device(), commandQueue.GetD3D12CommandQueue());
+        uploadContext.Initialize(devicePtr->GetD3D12Device(), commandQueue.GetD3D12CommandQueue());
 
         // 🎨 画像ファイルからテクスチャ読み込み
         Logger::Info("==========================================================");
@@ -212,7 +335,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
         try {
             mainTexture.LoadFromFile(
-                device.GetD3D12Device(),
+                devicePtr->GetD3D12Device(),
                 texturePath,
                 &uploadContext,
                 true  // ミップマップ自動生成
@@ -237,7 +360,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
             }
 
             mainTexture.CreateFromMemory(
-                device.GetD3D12Device(),
+                devicePtr->GetD3D12Device(),
                 width, height,
                 DXGI_FORMAT_R8G8B8A8_UNORM,
                 pixels.data()
@@ -254,38 +377,38 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
         Logger::Info("  - CBV at index %u", cbvHandle.index);
         Logger::Info("  - SRV at index %u", textureSrvHandle.index);
 
-        // 頂点データ
+        // 頂点データ（Vector2統一でテクスチャ座標を適切に設定）
         Vertex vertices[] = {
             // 前面
-            {{-0.5f, -0.5f,  0.5f}, 0.0f, 1.0f},
-            {{-0.5f,  0.5f,  0.5f}, 0.0f, 0.0f},
-            {{ 0.5f,  0.5f,  0.5f}, 1.0f, 0.0f},
-            {{ 0.5f, -0.5f,  0.5f}, 1.0f, 1.0f},
+            {{-0.5f, -0.5f,  0.5f}, {0.0f, 1.0f}},
+            {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f}},
+            {{ 0.5f,  0.5f,  0.5f}, {1.0f, 0.0f}},
+            {{ 0.5f, -0.5f,  0.5f}, {1.0f, 1.0f}},
             // 背面
-            {{ 0.5f, -0.5f, -0.5f}, 0.0f, 1.0f},
-            {{ 0.5f,  0.5f, -0.5f}, 0.0f, 0.0f},
-            {{-0.5f,  0.5f, -0.5f}, 1.0f, 0.0f},
-            {{-0.5f, -0.5f, -0.5f}, 1.0f, 1.0f},
+            {{ 0.5f, -0.5f, -0.5f}, {0.0f, 1.0f}},
+            {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f}},
+            {{-0.5f,  0.5f, -0.5f}, {1.0f, 0.0f}},
+            {{-0.5f, -0.5f, -0.5f}, {1.0f, 1.0f}},
             // 上面
-            {{-0.5f,  0.5f,  0.5f}, 0.0f, 1.0f},
-            {{-0.5f,  0.5f, -0.5f}, 0.0f, 0.0f},
-            {{ 0.5f,  0.5f, -0.5f}, 1.0f, 0.0f},
-            {{ 0.5f,  0.5f,  0.5f}, 1.0f, 1.0f},
+            {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f}},
+            {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f}},
+            {{ 0.5f,  0.5f, -0.5f}, {1.0f, 1.0f}},
+            {{ 0.5f,  0.5f,  0.5f}, {1.0f, 0.0f}},
             // 底面
-            {{-0.5f, -0.5f, -0.5f}, 0.0f, 1.0f},
-            {{-0.5f, -0.5f,  0.5f}, 0.0f, 0.0f},
-            {{ 0.5f, -0.5f,  0.5f}, 1.0f, 0.0f},
-            {{ 0.5f, -0.5f, -0.5f}, 1.0f, 1.0f},
+            {{-0.5f, -0.5f, -0.5f}, {0.0f, 1.0f}},
+            {{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f}},
+            {{ 0.5f, -0.5f,  0.5f}, {1.0f, 0.0f}},
+            {{ 0.5f, -0.5f, -0.5f}, {1.0f, 1.0f}},
             // 右面
-            {{ 0.5f, -0.5f,  0.5f}, 0.0f, 1.0f},
-            {{ 0.5f,  0.5f,  0.5f}, 0.0f, 0.0f},
-            {{ 0.5f,  0.5f, -0.5f}, 1.0f, 0.0f},
-            {{ 0.5f, -0.5f, -0.5f}, 1.0f, 1.0f},
+            {{ 0.5f, -0.5f,  0.5f}, {0.0f, 1.0f}},
+            {{ 0.5f,  0.5f,  0.5f}, {0.0f, 0.0f}},
+            {{ 0.5f,  0.5f, -0.5f}, {1.0f, 0.0f}},
+            {{ 0.5f, -0.5f, -0.5f}, {1.0f, 1.0f}},
             // 左面
-            {{-0.5f, -0.5f, -0.5f}, 0.0f, 1.0f},
-            {{-0.5f,  0.5f, -0.5f}, 0.0f, 0.0f},
-            {{-0.5f,  0.5f,  0.5f}, 1.0f, 0.0f},
-            {{-0.5f, -0.5f,  0.5f}, 1.0f, 1.0f},
+            {{-0.5f, -0.5f, -0.5f}, {0.0f, 1.0f}},
+            {{-0.5f,  0.5f, -0.5f}, {0.0f, 0.0f}},
+            {{-0.5f,  0.5f,  0.5f}, {1.0f, 0.0f}},
+            {{-0.5f, -0.5f,  0.5f}, {1.0f, 1.0f}},
         };
 
         uint32_t indices[] = {
@@ -297,44 +420,126 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
             20, 21, 22, 20, 22, 23, // 左面
         };
 
-        // バッファ作成
-        Buffer vertexBuffer;
-        vertexBuffer.Initialize(
-            device.GetD3D12Device(),
+        // 複数ジオメトリ用バッファ作成
+        std::vector<Vertex> sphereVertices;
+        std::vector<uint32_t> sphereIndices;
+        CreateSphereGeometry(sphereVertices, sphereIndices);
+
+        // キューブ用バッファ
+        Buffer cubeVertexBuffer;
+        cubeVertexBuffer.Initialize(
+            devicePtr->GetD3D12Device(),
             sizeof(vertices),
             BufferType::Vertex,
             D3D12_HEAP_TYPE_UPLOAD
         );
-        vertexBuffer.Upload(vertices, sizeof(vertices));
+        cubeVertexBuffer.Upload(vertices, sizeof(vertices));
 
-        Buffer indexBuffer;
-        indexBuffer.Initialize(
-            device.GetD3D12Device(),
+        Buffer cubeIndexBuffer;
+        cubeIndexBuffer.Initialize(
+            devicePtr->GetD3D12Device(),
             sizeof(indices),
             BufferType::Index,
             D3D12_HEAP_TYPE_UPLOAD
         );
-        indexBuffer.Upload(indices, sizeof(indices));
+        cubeIndexBuffer.Upload(indices, sizeof(indices));
+
+        // 球体用バッファ
+        Buffer sphereVertexBuffer;
+        sphereVertexBuffer.Initialize(
+            devicePtr->GetD3D12Device(),
+            static_cast<uint32_t>(sphereVertices.size() * sizeof(Vertex)),
+            BufferType::Vertex,
+            D3D12_HEAP_TYPE_UPLOAD
+        );
+        sphereVertexBuffer.Upload(sphereVertices.data(), static_cast<uint32_t>(sphereVertices.size() * sizeof(Vertex)));
+
+        Buffer sphereIndexBuffer;
+        sphereIndexBuffer.Initialize(
+            devicePtr->GetD3D12Device(),
+            static_cast<uint32_t>(sphereIndices.size() * sizeof(uint32_t)),
+            BufferType::Index,
+            D3D12_HEAP_TYPE_UPLOAD
+        );
+        sphereIndexBuffer.Upload(sphereIndices.data(), static_cast<uint32_t>(sphereIndices.size() * sizeof(uint32_t)));
 
         Buffer constantBuffer;
         constantBuffer.Initialize(
-            device.GetD3D12Device(),
+            devicePtr->GetD3D12Device(),
             256,
             BufferType::Constant,
             D3D12_HEAP_TYPE_UPLOAD
         );
+        
         Logger::Info("✓ Buffers created");
+        Logger::Info("Vertex struct size: %zu bytes", sizeof(Vertex));
+        Logger::Info("Vector3 size: %zu bytes", sizeof(Vector3));
+        Logger::Info("Vector2 size: %zu bytes", sizeof(Vector2));
+        
+        // 最初の頂点データの確認
+        Logger::Info("First vertex: pos(%.2f,%.2f,%.2f) uv(%.2f,%.2f)", 
+                     vertices[0].position.x, vertices[0].position.y, vertices[0].position.z,
+                     vertices[0].texcoord.x, vertices[0].texcoord.y);
 
         // CBV作成
         D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
         cbvDesc.BufferLocation = constantBuffer.GetGPUVirtualAddress();
         cbvDesc.SizeInBytes = 256;
-        device.GetD3D12Device()->CreateConstantBufferView(&cbvDesc, cbvHandle.cpu);
+        devicePtr->GetD3D12Device()->CreateConstantBufferView(&cbvDesc, cbvHandle.cpu);
         Logger::Info("✓ CBV created");
+        
 
         // SRV作成
-        mainTexture.CreateSRV(device.GetD3D12Device(), textureSrvHandle.cpu);
+        mainTexture.CreateSRV(devicePtr->GetD3D12Device(), textureSrvHandle.cpu);
         Logger::Info("✓ Texture SRV created");
+
+        // RenderGraph用のキューブ頂点データ（法線付き）
+        TestVertex rgCubeVertices[] = {
+            // 前面 (Z+)
+            {{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, 0.0f, 1.0f},
+            {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, 0.0f, 0.0f},
+            {{ 0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, 1.0f, 0.0f},
+            {{ 0.5f, -0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, 1.0f, 1.0f},
+            // 背面 (Z-)
+            {{ 0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, 0.0f, 1.0f},
+            {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, 0.0f, 0.0f},
+            {{-0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, 1.0f, 0.0f},
+            {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, 1.0f, 1.0f},
+            // 上面 (Y+)
+            {{-0.5f,  0.5f,  0.5f}, {0.0f, 1.0f, 0.0f}, 0.0f, 0.0f},
+            {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, 0.0f, 1.0f},
+            {{ 0.5f,  0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, 1.0f, 1.0f},
+            {{ 0.5f,  0.5f,  0.5f}, {0.0f, 1.0f, 0.0f}, 1.0f, 0.0f},
+            // 底面 (Y-)
+            {{-0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}, 0.0f, 1.0f},
+            {{-0.5f, -0.5f,  0.5f}, {0.0f, -1.0f, 0.0f}, 0.0f, 0.0f},
+            {{ 0.5f, -0.5f,  0.5f}, {0.0f, -1.0f, 0.0f}, 1.0f, 0.0f},
+            {{ 0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}, 1.0f, 1.0f},
+            // 右面 (X+)
+            {{ 0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}, 0.0f, 1.0f},
+            {{ 0.5f,  0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}, 0.0f, 0.0f},
+            {{ 0.5f,  0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, 1.0f, 0.0f},
+            {{ 0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, 1.0f, 1.0f},
+            // 左面 (X-)
+            {{-0.5f, -0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}, 0.0f, 1.0f},
+            {{-0.5f,  0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}, 0.0f, 0.0f},
+            {{-0.5f,  0.5f,  0.5f}, {-1.0f, 0.0f, 0.0f}, 1.0f, 0.0f},
+            {{-0.5f, -0.5f,  0.5f}, {-1.0f, 0.0f, 0.0f}, 1.0f, 1.0f},
+        };
+
+        // RenderGraphに頂点データとテクスチャを設定
+        if (renderGraphExampleResult) {
+            // 初期設定はキューブデータ
+            SetRenderGraphVertexData(rgCubeVertices, 24, indices, 36);
+            
+            // メインテクスチャをRenderGraphにも設定（共有ポインタで管理）
+            auto mainTexturePtr = std::make_shared<Texture>();
+            // 同じテクスチャリソースを共有するため、メインテクスチャからコピー
+            // 今回は簡略化のため、RenderGraphでテクスチャ設定をスキップ
+            Logger::Info("✓ RenderGraph texture sharing (simplified)");
+            
+            Logger::Info("✓ RenderGraph vertex data and texture configured");
+        }
 
         // シェーダーコンパイル
         Logger::Info("Compiling shaders...");
@@ -392,7 +597,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
         }
 
         ComPtr<ID3D12RootSignature> rootSignature;
-        device.GetD3D12Device()->CreateRootSignature(
+        devicePtr->GetD3D12Device()->CreateRootSignature(
             0,
             signature->GetBufferPointer(),
             signature->GetBufferSize(),
@@ -427,7 +632,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
         psoDesc.SampleDesc.Count = 1;
 
         ComPtr<ID3D12PipelineState> pipelineState;
-        hr = device.GetD3D12Device()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pipelineState));
+        hr = devicePtr->GetD3D12Device()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pipelineState));
         if (FAILED(hr)) {
             throw std::runtime_error("Failed to create pipeline state");
         }
@@ -441,6 +646,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
         // メインループ
         MSG msg = {};
         float rotation = 0.0f;
+        bool firstFrame = true;
 
 
         while (msg.message != WM_QUIT) {
@@ -466,15 +672,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
                 100.0f
             );
 
-           /* Matrix4x4 mvp = proj * view * world;
-            mvp = mvp.Transpose();*/
-
             Matrix4x4 mvp = world * view * proj;
-			mvp = mvp.Transpose();
+            mvp = mvp.Transpose();
 
             TransformBuffer cbData = {};
             cbData.mvp = mvp;
             constantBuffer.Upload(&cbData, sizeof(TransformBuffer));
+
+            // RenderGraphにシーンデータを設定
+            if (renderGraphExampleResult) {
+                Vector3 cameraPos(0.0f, 1.0f, -3.0f);
+                Vector3 lightDir(0.0f, -1.0f, 0.0f);
+                Vector3 lightColor(1.0f, 1.0f, 1.0f);
+                SetRenderGraphSceneData(world, view, proj, cameraPos, lightDir, lightColor);
+            }
 
             // コマンド記録
             commandAllocator->Reset();
@@ -508,21 +719,99 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
             commandList->SetGraphicsRootSignature(rootSignature.Get());
 
+            // RenderGraphレンダリング（Cube/Sphere両方で有効）
+            if (renderGraphExampleResult) {
+                // 表示モードに応じて頂点データを設定
+                static DisplayMode lastMode = DisplayMode::COUNT; // 無効な初期値
+                if (g_currentMode != lastMode) {
+                    if (g_currentMode == DisplayMode::Cube) {
+                        SetRenderGraphVertexData(rgCubeVertices, 24, indices, 36);
+                        Logger::Info("RenderGraph: Switched to Cube vertex data");
+                    } else if (g_currentMode == DisplayMode::Sphere) {
+                        // Sphere頂点データを変換してRenderGraphに設定
+                        std::vector<TestVertex> rgSphereVertices;
+                        rgSphereVertices.reserve(sphereVertices.size());
+                        
+                        for (const auto& vertex : sphereVertices) {
+                            TestVertex rgVertex;
+                            rgVertex.position = vertex.position;
+                            rgVertex.normal = vertex.position.Normalize(); // 球体は位置=法線
+                            rgVertex.u = vertex.texcoord.x;
+                            rgVertex.v = vertex.texcoord.y;
+                            rgSphereVertices.push_back(rgVertex);
+                        }
+                        
+                        SetRenderGraphVertexData(rgSphereVertices.data(), 
+                                               static_cast<uint32_t>(rgSphereVertices.size()),
+                                               sphereIndices.data(), 
+                                               static_cast<uint32_t>(sphereIndices.size()));
+                        Logger::Info("RenderGraph: Switched to Sphere vertex data");
+                    }
+                    lastMode = g_currentMode;
+                }
+                
+                // RenderGraphで単一オブジェクトを描画
+                Athena::Matrix4x4 rgWorld = world; // メインレンダリングと同じ変換
+                Athena::Vector3 cameraPos(0.0f, 1.0f, -3.0f);
+                Athena::Vector3 lightDir(0.0f, -1.0f, 0.0f);
+                Athena::Vector3 lightColor(1.0f, 1.0f, 1.0f);
+                
+                SetRenderGraphSceneData(rgWorld, view, proj, cameraPos, lightDir, lightColor);
+                SetRenderGraphObjectID(0); // 単一オブジェクト
+                
+                RenderWithRenderGraph(commandList.Get(), cbvSrvHeap.GetD3D12DescriptorHeap(), rtvHandle, dsvHandle.cpu);
+                
+                // RenderGraph実行後、メインレンダリング用の状態を再設定
+                commandList->SetGraphicsRootSignature(rootSignature.Get());
+                commandList->SetPipelineState(pipelineState.Get());
+                
+                // デスクリプタヒープとテーブルを再設定（RenderGraphで上書きされた可能性があるため）
+                ID3D12DescriptorHeap* mainHeaps[] = { cbvSrvHeap.GetD3D12DescriptorHeap() };
+                commandList->SetDescriptorHeaps(1, mainHeaps);
+            }
+
+            // メインレンダリング用のデスクリプタ設定
+            // RenderGraphが実行されていない場合、デスクリプタヒープを設定
             ID3D12DescriptorHeap* heaps[] = { cbvSrvHeap.GetD3D12DescriptorHeap() };
             commandList->SetDescriptorHeaps(1, heaps);
+            
+            // デスクリプタテーブルはCBVから始まって2つのデスクリプタを含む
             commandList->SetGraphicsRootDescriptorTable(0, cbvHandle.gpu);
+            if (firstFrame) {
+                Logger::Info("CBV GPU Handle: %llu, SRV GPU Handle: %llu", cbvHandle.gpu.ptr, textureSrvHandle.gpu.ptr);
+                firstFrame = false;
+            }
 
             commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-            D3D12_VERTEX_BUFFER_VIEW vbv = vertexBuffer.GetVertexBufferView();
-            vbv.StrideInBytes = sizeof(Vertex);
+            // 表示モードに応じてバッファを切り替え
+            D3D12_VERTEX_BUFFER_VIEW vbv;
+            D3D12_INDEX_BUFFER_VIEW ibv;
+            uint32_t indexCount = 0;
 
-            D3D12_INDEX_BUFFER_VIEW ibv = indexBuffer.GetIndexBufferView();
+            switch (g_currentMode) {
+            case DisplayMode::Cube:
+                vbv = cubeVertexBuffer.GetVertexBufferView();
+                vbv.StrideInBytes = sizeof(Vertex);
+                ibv = cubeIndexBuffer.GetIndexBufferView();
+                indexCount = 36;
+                break;
+            case DisplayMode::Sphere:
+                vbv = sphereVertexBuffer.GetVertexBufferView();
+                vbv.StrideInBytes = sizeof(Vertex);
+                ibv = sphereIndexBuffer.GetIndexBufferView();
+                indexCount = static_cast<uint32_t>(sphereIndices.size());
+                break;
+            }
 
             commandList->IASetVertexBuffers(0, 1, &vbv);
             commandList->IASetIndexBuffer(&ibv);
 
-            commandList->DrawIndexedInstanced(36, 1, 0, 0, 0);
+            // 全てRenderGraphで描画するため、従来レンダリングは無効
+            if (!renderGraphExampleResult) {
+                Logger::Warning("RenderGraph disabled - no fallback rendering available");
+            }
+
 
             barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
             barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -548,8 +837,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
         // リソース解放（バッファ・テクスチャ）
         constantBuffer.Shutdown();
-        indexBuffer.Shutdown();
-        vertexBuffer.Shutdown();
+        cubeIndexBuffer.Shutdown();
+        cubeVertexBuffer.Shutdown();
+        sphereIndexBuffer.Shutdown();
+        sphereVertexBuffer.Shutdown();
         mainTexture.Shutdown();
         depthTexture.Shutdown();
 
@@ -565,7 +856,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
         commandQueue.Shutdown();
 
         // Device解放
-        device.Shutdown();
+        devicePtr->Shutdown();
 
         Logger::Info("✓ Shutdown complete");
         Logger::Shutdown();

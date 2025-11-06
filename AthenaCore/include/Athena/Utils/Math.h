@@ -1,12 +1,57 @@
-#pragma once
+ï»¿#pragma once
 
+#define NOMINMAX
 #include <cmath>
 #include <algorithm>
 
 namespace Athena {
 
     /**
-     * @brief 3DƒxƒNƒgƒ‹
+     * @brief 2Dãƒ™ã‚¯ãƒˆãƒ«
+     */
+    struct Vector2 {
+        float x, y;
+
+        Vector2() : x(0), y(0) {}
+        Vector2(float x, float y) : x(x), y(y) {}
+
+        // æ¼”ç®—å­
+        Vector2 operator+(const Vector2& v) const { return Vector2(x + v.x, y + v.y); }
+        Vector2 operator-(const Vector2& v) const { return Vector2(x - v.x, y - v.y); }
+        Vector2 operator*(float s) const { return Vector2(x * s, y * s); }
+        Vector2 operator/(float s) const { return Vector2(x / s, y / s); }
+        Vector2& operator+=(const Vector2& v) { x += v.x; y += v.y; return *this; }
+        Vector2& operator-=(const Vector2& v) { x -= v.x; y -= v.y; return *this; }
+        Vector2& operator*=(float s) { x *= s; y *= s; return *this; }
+        Vector2& operator/=(float s) { x /= s; y /= s; return *this; }
+
+        // å†…ç©
+        float Dot(const Vector2& v) const {
+            return x * v.x + y * v.y;
+        }
+
+        // é•·ã•
+        float Length() const {
+            return std::sqrt(x * x + y * y);
+        }
+
+        // é•·ã•ã®2ä¹—
+        float LengthSquared() const {
+            return x * x + y * y;
+        }
+
+        // æ­£è¦åŒ–
+        Vector2 Normalize() const {
+            float len = Length();
+            if (len > 0.0f) {
+                return Vector2(x / len, y / len);
+            }
+            return Vector2(0, 0);
+        }
+    };
+
+    /**
+     * @brief 3Dãƒ™ã‚¯ãƒˆãƒ«
      */
     struct Vector3 {
         float x, y, z;
@@ -14,7 +59,7 @@ namespace Athena {
         Vector3() : x(0), y(0), z(0) {}
         Vector3(float x, float y, float z) : x(x), y(y), z(z) {}
 
-        // ‰‰Zq
+        // æ¼”ç®—å­
         Vector3 operator+(const Vector3& v) const { return Vector3(x + v.x, y + v.y, z + v.z); }
         Vector3 operator-(const Vector3& v) const { return Vector3(x - v.x, y - v.y, z - v.z); }
         Vector3 operator*(float s) const { return Vector3(x * s, y * s, z * s); }
@@ -24,12 +69,12 @@ namespace Athena {
         Vector3& operator*=(float s) { x *= s; y *= s; z *= s; return *this; }
         Vector3& operator/=(float s) { x /= s; y /= s; z /= s; return *this; }
 
-        // “àÏ
+        // å†…ç©
         float Dot(const Vector3& v) const {
             return x * v.x + y * v.y + z * v.z;
         }
 
-        // ŠOÏ
+        // å¤–ç©
         Vector3 Cross(const Vector3& v) const {
             return Vector3(
                 y * v.z - z * v.y,
@@ -38,40 +83,40 @@ namespace Athena {
             );
         }
 
-        // ’·‚³
+        // é•·ã•
         float Length() const {
             return std::sqrt(x * x + y * y + z * z);
         }
 
-        // ’·‚³‚Ì2æi•½•ûªŒvZ‚ğÈ—ªj
+        // é•·ã•ã®2ä¹—ï¼ˆå¹³æ–¹æ ¹è¨ˆç®—ã‚’çœç•¥ï¼‰
         float LengthSquared() const {
             return x * x + y * y + z * z;
         }
 
-        // ³‹K‰»
+        // æ­£è¦åŒ–
         Vector3 Normalize() const {
             float len = Length();
             return (len > 0.0f) ? (*this / len) : Vector3(0, 0, 0);
         }
 
-        // üŒ`•âŠÔ
+        // ç·šå½¢è£œé–“
         static Vector3 Lerp(const Vector3& a, const Vector3& b, float t) {
             return a * (1.0f - t) + b * t;
         }
 
-        // ‹——£
+        // è·é›¢
         static float Distance(const Vector3& a, const Vector3& b) {
             return (b - a).Length();
         }
 
-        // ”½ËƒxƒNƒgƒ‹
+        // åå°„ãƒ™ã‚¯ãƒˆãƒ«
         Vector3 Reflect(const Vector3& normal) const {
             return *this - normal * (2.0f * Dot(normal));
         }
     };
 
     /**
-     * @brief 4DƒxƒNƒgƒ‹i“¯ŸÀ•Wj
+     * @brief 4Dãƒ™ã‚¯ãƒˆãƒ«ï¼ˆåŒæ¬¡åº§æ¨™ï¼‰
      */
     struct Vector4 {
         float x, y, z, w;
@@ -84,13 +129,13 @@ namespace Athena {
     };
 
     /**
-     * @brief 4x4s—ñ
+     * @brief 4x4è¡Œåˆ—
      *
-     * ƒƒ‚ƒŠƒŒƒCƒAƒEƒgFs—DæiRow-majorj
-     * m[s][—ñ]
+     * ãƒ¡ãƒ¢ãƒªãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆï¼šè¡Œå„ªå…ˆï¼ˆRow-majorï¼‰
+     * m[è¡Œ][åˆ—]
      *
-     * DirectX 12‚Å‚ÍAC++‘¤‚Ís—DæAHLSL‘¤‚Í—ñ—Dæ‚Æ‚µ‚Äˆµ‚¤B
-     * ‚»‚Ì‚½‚ßAƒVƒF[ƒ_[‚É“n‚·‘O‚É“]’u‚ª•K—v‚Èê‡‚ª‚ ‚éB
+     * DirectX 12ã§ã¯ã€C++å´ã¯è¡Œå„ªå…ˆã€HLSLå´ã¯åˆ—å„ªå…ˆã¨ã—ã¦æ‰±ã†ã€‚
+     * ãã®ãŸã‚ã€ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã«æ¸¡ã™å‰ã«è»¢ç½®ãŒå¿…è¦ãªå ´åˆãŒã‚ã‚‹ã€‚
      */
     struct Matrix4x4 {
         float m[4][4];
@@ -99,7 +144,7 @@ namespace Athena {
             Identity();
         }
 
-        // ’PˆÊs—ñ
+        // å˜ä½è¡Œåˆ—
         void Identity() {
             for (int i = 0; i < 4; ++i) {
                 for (int j = 0; j < 4; ++j) {
@@ -108,7 +153,14 @@ namespace Athena {
             }
         }
 
-        // s—ñ‚ÌæZ
+        // å˜ä½è¡Œåˆ—ã‚’è¿”ã™é™çš„ãƒ¡ã‚½ãƒƒãƒ‰
+        static Matrix4x4 CreateIdentity() {
+            Matrix4x4 mat;
+            mat.Identity();
+            return mat;
+        }
+
+        // è¡Œåˆ—ã®ä¹—ç®—
         Matrix4x4 operator*(const Matrix4x4& other) const {
             Matrix4x4 result;
             for (int i = 0; i < 4; ++i) {
@@ -122,7 +174,7 @@ namespace Athena {
             return result;
         }
 
-        // ƒxƒNƒgƒ‹‚Æ‚ÌæZ
+        // ãƒ™ã‚¯ãƒˆãƒ«ã¨ã®ä¹—ç®—
         Vector4 operator*(const Vector4& v) const {
             Vector4 result;
             result.x = m[0][0] * v.x + m[0][1] * v.y + m[0][2] * v.z + m[0][3] * v.w;
@@ -132,7 +184,7 @@ namespace Athena {
             return result;
         }
 
-        // “]’uiHLSL—p‚É—ñ—Dæ‚É•ÏŠ·j
+        // è»¢ç½®ï¼ˆHLSLç”¨ã«åˆ—å„ªå…ˆã«å¤‰æ›ï¼‰
         Matrix4x4 Transpose() const {
             Matrix4x4 result;
             for (int i = 0; i < 4; ++i) {
@@ -143,7 +195,7 @@ namespace Athena {
             return result;
         }
 
-        // s—ñ®i3x3•”•ªj
+        // è¡Œåˆ—å¼ï¼ˆ3x3ä½™å› å­ï¼‰
         float Determinant3x3(int row, int col) const {
             int rows[3], cols[3];
             int r = 0, c = 0;
@@ -160,7 +212,7 @@ namespace Athena {
                 + m[rows[0]][cols[2]] * (m[rows[1]][cols[0]] * m[rows[2]][cols[1]] - m[rows[1]][cols[1]] * m[rows[2]][cols[0]]);
         }
 
-        // s—ñ®
+        // è¡Œåˆ—å¼
         float Determinant() const {
             float det = 0.0f;
             for (int i = 0; i < 4; ++i) {
@@ -170,13 +222,13 @@ namespace Athena {
             return det;
         }
 
-        // ‹ts—ñ
+        // é€†è¡Œåˆ—
         Matrix4x4 Inverse() const {
             Matrix4x4 result;
             float det = Determinant();
 
             if (std::abs(det) < 1e-6f) {
-                // ‹ts—ñ‚ª‘¶İ‚µ‚È‚¢ê‡‚Í’PˆÊs—ñ‚ğ•Ô‚·
+                // é€†è¡Œåˆ—ãŒå­˜åœ¨ã—ãªã„å ´åˆã¯å˜ä½è¡Œåˆ—ã‚’è¿”ã™
                 result.Identity();
                 return result;
             }
@@ -193,7 +245,7 @@ namespace Athena {
             return result;
         }
 
-        // •½sˆÚ“®s—ñ
+        // å¹³è¡Œç§»å‹•è¡Œåˆ—
         static Matrix4x4 Translation(float x, float y, float z) {
             Matrix4x4 mat;
             mat.m[0][3] = x;
@@ -206,7 +258,7 @@ namespace Athena {
             return Translation(v.x, v.y, v.z);
         }
 
-        // ƒXƒP[ƒ‹s—ñ
+        // ã‚¹ã‚±ãƒ¼ãƒ«è¡Œåˆ—
         static Matrix4x4 Scaling(float x, float y, float z) {
             Matrix4x4 mat;
             mat.m[0][0] = x;
@@ -223,7 +275,7 @@ namespace Athena {
             return Scaling(v.x, v.y, v.z);
         }
 
-        // X²‰ñ“]s—ñ
+        // Xè»¸å›è»¢è¡Œåˆ—
         static Matrix4x4 RotationX(float angle) {
             Matrix4x4 mat;
             float c = std::cos(angle);
@@ -235,7 +287,7 @@ namespace Athena {
             return mat;
         }
 
-        // Y²‰ñ“]s—ñ
+        // Yè»¸å›è»¢è¡Œåˆ—
         static Matrix4x4 RotationY(float angle) {
             Matrix4x4 mat;
             float c = std::cos(angle);
@@ -247,7 +299,7 @@ namespace Athena {
             return mat;
         }
 
-        // Z²‰ñ“]s—ñ
+        // Zè»¸å›è»¢è¡Œåˆ—
         static Matrix4x4 RotationZ(float angle) {
             Matrix4x4 mat;
             float c = std::cos(angle);
@@ -259,7 +311,7 @@ namespace Athena {
             return mat;
         }
 
-        // ”CˆÓ²‰ñ“]s—ñiRodrigues‚Ì‰ñ“]Œö®j
+        // ä»»æ„è»¸å›è»¢è¡Œåˆ—ï¼ˆRodriguesã®å›è»¢å…¬å¼ï¼‰
         static Matrix4x4 RotationAxis(const Vector3& axis, float angle) {
             Vector3 n = axis.Normalize();
             float c = std::cos(angle);
@@ -290,11 +342,11 @@ namespace Athena {
             return mat;
         }
 
-        // ƒrƒ…[s—ñi¶èÀ•WŒnj
+        // ãƒ“ãƒ¥ãƒ¼è¡Œåˆ—ï¼ˆå³æ‰‹åº§æ¨™ç³»ï¼‰
         static Matrix4x4 LookAtLH(const Vector3& eye, const Vector3& target, const Vector3& up) {
-            Vector3 zAxis = (target - eye).Normalize();  // ‘O•ûŒü
-            Vector3 xAxis = up.Cross(zAxis).Normalize(); // ‰E•ûŒü
-            Vector3 yAxis = zAxis.Cross(xAxis);          // ã•ûŒü
+            Vector3 zAxis = (target - eye).Normalize();  // å‰æ–¹å‘
+            Vector3 xAxis = up.Cross(zAxis).Normalize(); // å³æ–¹å‘
+            Vector3 yAxis = zAxis.Cross(xAxis);          // ä¸Šæ–¹å‘
 
             Matrix4x4 mat;
             mat.m[0][0] = xAxis.x;
@@ -320,11 +372,11 @@ namespace Athena {
             return mat;
         }
 
-        // ƒrƒ…[s—ñi‰EèÀ•WŒnj
+        // ãƒ“ãƒ¥ãƒ¼è¡Œåˆ—ï¼ˆå·¦æ‰‹åº§æ¨™ç³»ï¼‰
         static Matrix4x4 LookAtRH(const Vector3& eye, const Vector3& target, const Vector3& up) {
-            Vector3 zAxis = (eye - target).Normalize();  // ‘O•ûŒüi‰EèŒn‚Í‹tj
-            Vector3 xAxis = up.Cross(zAxis).Normalize(); // ‰E•ûŒü
-            Vector3 yAxis = zAxis.Cross(xAxis);          // ã•ûŒü
+            Vector3 zAxis = (eye - target).Normalize();  // å‰æ–¹å‘ï¼ˆå³æ‰‹ç³»ã¯é€†ï¼‰
+            Vector3 xAxis = up.Cross(zAxis).Normalize(); // å³æ–¹å‘
+            Vector3 yAxis = zAxis.Cross(xAxis);          // ä¸Šæ–¹å‘
 
             Matrix4x4 mat;
             mat.m[0][0] = xAxis.x;
@@ -350,12 +402,12 @@ namespace Athena {
             return mat;
         }
 
-        // ƒfƒtƒHƒ‹ƒg‚ÌLookAti¶èÀ•WŒnj
+        // ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®LookAtï¼ˆå³æ‰‹åº§æ¨™ç³»ï¼‰
         static Matrix4x4 LookAt(const Vector3& eye, const Vector3& target, const Vector3& up) {
             return LookAtLH(eye, target, up);
         }
 
-        // “§‹“Š‰es—ñi¶èÀ•WŒnj
+        // é€è¦–æŠ•å½±è¡Œåˆ—ï¼ˆå³æ‰‹åº§æ¨™ç³»ï¼‰
         static Matrix4x4 PerspectiveFovLH(float fovY, float aspect, float nearZ, float farZ) {
             float h = 1.0f / std::tan(fovY * 0.5f);
             float w = h / aspect;
@@ -371,7 +423,7 @@ namespace Athena {
             return mat;
         }
 
-        // “§‹“Š‰es—ñi‰EèÀ•WŒnj
+        // é€è¦–æŠ•å½±è¡Œåˆ—ï¼ˆå·¦æ‰‹åº§æ¨™ç³»ï¼‰
         static Matrix4x4 PerspectiveFovRH(float fovY, float aspect, float nearZ, float farZ) {
             float h = 1.0f / std::tan(fovY * 0.5f);
             float w = h / aspect;
@@ -387,12 +439,12 @@ namespace Athena {
             return mat;
         }
 
-        // ƒfƒtƒHƒ‹ƒg‚ÌPerspectivei¶èÀ•WŒnj
+        // ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®Perspectiveï¼ˆå³æ‰‹åº§æ¨™ç³»ï¼‰
         static Matrix4x4 Perspective(float fovY, float aspect, float nearZ, float farZ) {
             return PerspectiveFovLH(fovY, aspect, nearZ, farZ);
         }
 
-        // ³Ë‰es—ñi¶èÀ•WŒnj
+        // æ­£å°„å½±è¡Œåˆ—ï¼ˆå³æ‰‹åº§æ¨™ç³»ï¼‰
         static Matrix4x4 OrthographicLH(float width, float height, float nearZ, float farZ) {
             Matrix4x4 mat;
             mat.m[0][0] = 2.0f / width;
@@ -402,7 +454,7 @@ namespace Athena {
             return mat;
         }
 
-        // ³Ë‰es—ñi‰EèÀ•WŒnj
+        // æ­£å°„å½±è¡Œåˆ—ï¼ˆå·¦æ‰‹åº§æ¨™ç³»ï¼‰
         static Matrix4x4 OrthographicRH(float width, float height, float nearZ, float farZ) {
             Matrix4x4 mat;
             mat.m[0][0] = 2.0f / width;
@@ -412,7 +464,7 @@ namespace Athena {
             return mat;
         }
 
-        // ƒIƒtƒZƒ“ƒ^[³Ë‰ei¶èÀ•WŒnj
+        // ã‚ªãƒ•ã‚»ãƒ³ã‚¿ãƒ¼æ­£å°„å½±ï¼ˆå³æ‰‹åº§æ¨™ç³»ï¼‰
         static Matrix4x4 OrthographicOffCenterLH(float left, float right, float bottom, float top, float nearZ, float farZ) {
             Matrix4x4 mat;
             mat.m[0][0] = 2.0f / (right - left);
@@ -424,7 +476,7 @@ namespace Athena {
             return mat;
         }
 
-        // ƒIƒtƒZƒ“ƒ^[³Ë‰ei‰EèÀ•WŒnj
+        // ã‚ªãƒ•ã‚»ãƒ³ã‚¿ãƒ¼æ­£å°„å½±ï¼ˆå·¦æ‰‹åº§æ¨™ç³»ï¼‰
         static Matrix4x4 OrthographicOffCenterRH(float left, float right, float bottom, float top, float nearZ, float farZ) {
             Matrix4x4 mat;
             mat.m[0][0] = 2.0f / (right - left);
@@ -437,33 +489,33 @@ namespace Athena {
         }
     };
 
-    // ’è”
+    // å®šæ•°
     constexpr float PI = 3.14159265358979323846f;
     constexpr float TWO_PI = 2.0f * PI;
     constexpr float HALF_PI = 0.5f * PI;
     constexpr float EPSILON = 1e-6f;
 
-    // “x‚ğƒ‰ƒWƒAƒ“‚É•ÏŠ·
+    // åº¦ã‚’ãƒ©ã‚¸ã‚¢ãƒ³ã«å¤‰æ›
     inline float ToRadians(float degrees) {
         return degrees * (PI / 180.0f);
     }
 
-    // ƒ‰ƒWƒAƒ“‚ğ“x‚É•ÏŠ·
+    // ãƒ©ã‚¸ã‚¢ãƒ³ã‚’åº¦ã«å¤‰æ›
     inline float ToDegrees(float radians) {
         return radians * (180.0f / PI);
     }
 
-    // ’l‚ÌƒNƒ‰ƒ“ƒv
-    inline float Clamp(float value, float min, float max) {
-        return std::max(min, std::min(value, max));
+    // å€¤ã®ã‚¯ãƒ©ãƒ³ãƒ—
+    inline float Clamp(float value, float minVal, float maxVal) {
+        return (std::max)(minVal, (std::min)(value, maxVal));
     }
 
-    // üŒ`•âŠÔ
+    // ç·šå½¢è£œé–“
     inline float Lerp(float a, float b, float t) {
         return a + (b - a) * t;
     }
 
-    // •½ŠŠ•âŠÔiSmoothstepj
+    // æ»‘ã‚‰ã‹è£œé–“ï¼ˆSmoothstepï¼‰
     inline float Smoothstep(float edge0, float edge1, float x) {
         float t = Clamp((x - edge0) / (edge1 - edge0), 0.0f, 1.0f);
         return t * t * (3.0f - 2.0f * t);

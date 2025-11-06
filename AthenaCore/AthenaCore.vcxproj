@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -108,15 +108,11 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;ATHENA_CORE_EXPORTS
-;WIN32;
-_WINDOWS
-;UNICODE
-;_UNICODE
-;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_LIB;ATHENA_CORE_EXPORTS;WIN32;_WINDOWS;UNICODE;_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -137,6 +133,7 @@ _WINDOWS
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -152,8 +149,17 @@ _WINDOWS
     <ClInclude Include="include\Athena\Core\SwapChain.h" />
     <ClInclude Include="include\Athena\Resources\Texture.h" />
     <ClInclude Include="include\Athena\Resources\UploadContext.h" />
+    <ClInclude Include="include\Athena\Scene\Camera.h" />
+    <ClInclude Include="include\Athena\Scene\Mesh.h" />
     <ClInclude Include="include\Athena\Utils\Logger.h" />
     <ClInclude Include="include\Athena\Utils\Math.h" />
+    <ClInclude Include="include\Athena\RenderGraph\ResourceHandle.h" />
+    <ClInclude Include="include\Athena\RenderGraph\RenderPass.h" />
+    <ClInclude Include="include\Athena\RenderGraph\RenderGraph.h" />
+    <ClInclude Include="include\Athena\RenderGraph\RenderGraphBuilder.h" />
+    <ClInclude Include="include\Athena\RenderGraph\GeometryPass.h" />
+    <ClInclude Include="include\Athena\RenderGraph\LightingPass.h" />
+    <ClInclude Include="include\Athena\RenderGraph\ToneMappingPass.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Athena\Resources\Buffer.cpp" />
@@ -163,7 +169,16 @@ _WINDOWS
     <ClCompile Include="src\Athena\Core\SwapChain.cpp" />
     <ClCompile Include="src\Athena\Resources\Texture.cpp" />
     <ClCompile Include="src\Athena\Resources\UploadContext.cpp" />
+    <ClCompile Include="src\Athena\Scene\Camera.cpp" />
+    <ClCompile Include="src\Athena\Scene\Mesh.cpp" />
     <ClCompile Include="src\Athena\Utils\Logger.cpp" />
+    <ClCompile Include="src\Athena\RenderGraph\ResourceHandle.cpp" />
+    <ClCompile Include="src\Athena\RenderGraph\RenderPass.cpp" />
+    <ClCompile Include="src\Athena\RenderGraph\RenderGraph.cpp" />
+    <ClCompile Include="src\Athena\RenderGraph\RenderGraphBuilder.cpp" />
+    <ClCompile Include="src\Athena\RenderGraph\GeometryPass.cpp" />
+    <ClCompile Include="src\Athena\RenderGraph\LightingPass.cpp" />
+    <ClCompile Include="src\Athena\RenderGraph\ToneMappingPass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

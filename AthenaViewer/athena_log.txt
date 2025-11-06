@@ -1,83 +1,1482 @@
-[14:40:35][INFO] ===========================================
-[14:40:35][INFO] Athena Renderer - Log Started
-[14:40:35][INFO] ===========================================
-[14:40:35][INFO] ==========================================================
-[14:40:35][INFO]   Athena Renderer - Phase 4: Image File Loading
-[14:40:35][INFO] ==========================================================
-[14:40:35][INFO] ? Window created
-[14:40:35][INFO] Initializing Device...
-[14:40:35][INFO] D3D12 Debug Layer enabled
-[14:40:35][INFO] Selected GPU: NVIDIA GeForce GTX 1660 SUPER
-[14:40:35][INFO] VRAM: 5.83 GB
-[14:40:35][INFO] Feature Support:
-[14:40:35][INFO]   Mesh Shaders: Yes
-[14:40:35][INFO]   Raytracing: Yes
-[14:40:35][INFO]   VRS: Yes
-[14:40:35][INFO] Device initialized successfully
-[14:40:35][INFO] ? Device initialized
-[14:40:35][INFO] Initializing CommandQueue...
-[14:40:35][INFO] CommandQueue initialized successfully
-[14:40:35][INFO] ? CommandQueue initialized
-[14:40:35][INFO] Initializing SwapChain (1280x720)...
-[14:40:35][INFO] Created 3 back buffers
-[14:40:35][INFO] SwapChain initialized successfully
-[14:40:35][INFO] ? SwapChain initialized
-[14:40:35][INFO] Initializing DescriptorHeap (type: 2, capacity: 3, shaderVisible: No)...
-[14:40:35][INFO] DescriptorHeap initialized (descriptor size: 32 bytes)
-[14:40:35][INFO] Initializing DescriptorHeap (type: 3, capacity: 1, shaderVisible: No)...
-[14:40:35][INFO] DescriptorHeap initialized (descriptor size: 8 bytes)
-[14:40:35][INFO] Initializing DescriptorHeap (type: 0, capacity: 10, shaderVisible: Yes)...
-[14:40:35][INFO] DescriptorHeap initialized (descriptor size: 32 bytes)
-[14:40:35][INFO] ? Descriptor heaps created
-[14:40:35][INFO] ? RTVs created
-[14:40:35][INFO] Depth stencil texture created: 1280x720
-[14:40:35][INFO] ? Depth buffer created
-[14:40:35][INFO] ? Command allocator and list created
-[14:40:35][INFO] UploadContext initialized
-[14:40:35][INFO] ==========================================================
-[14:40:35][INFO]   Loading texture from file...
-[14:40:35][INFO] ==========================================================
-[14:40:35][INFO] Loading texture from file: ../assets/Sunamerikun.png
-[14:40:35][INFO]   Size: 1280x1280
-[14:40:35][INFO]   Format: 91
-[14:40:35][INFO]   Mip levels in file: 1
-[14:40:35][INFO]   Generating mipmaps...
-[14:40:36][INFO]   Generated 11 mip levels
-[14:40:36][INFO] ? Texture loaded successfully: ../assets/Sunamerikun.png
-[14:40:36][INFO] ? Texture loaded from file!
-[14:40:36][INFO] ? Descriptors allocated:
-[14:40:36][INFO]   - CBV at index 0
-[14:40:36][INFO]   - SRV at index 1
-[14:40:36][INFO] Buffer initialized (size: 480 bytes, type: 0)
-[14:40:36][INFO] Buffer initialized (size: 144 bytes, type: 1)
-[14:40:36][INFO] Buffer initialized (size: 256 bytes, type: 2)
-[14:40:36][INFO] ? Buffers created
-[14:40:36][INFO] ? CBV created
-[14:40:36][INFO] ? Texture SRV created
-[14:40:36][INFO] Compiling shaders...
-[14:40:36][INFO] ? Shader compiled: ../shaders/TexturedVS.hlsl
-[14:40:36][INFO] ? Shader compiled: ../shaders/TexturedPS.hlsl
-[14:40:36][INFO] ? Root signature created
-[14:40:36][INFO] ? Pipeline state created
-[14:40:36][INFO] ==========================================================
-[14:40:36][INFO]   初期化完了！レンダリングループ開始
-[14:40:36][INFO]   ESC: 終了
-[14:40:36][INFO] ==========================================================
-[14:40:38][INFO] ==========================================================
-[14:40:38][INFO]   終了処理開始
-[14:40:38][INFO] ==========================================================
-[14:40:38][INFO] Shutting down DescriptorHeap...
-[14:40:38][INFO] DescriptorHeap shut down successfully
-[14:40:38][INFO] Shutting down DescriptorHeap...
-[14:40:38][INFO] DescriptorHeap shut down successfully
-[14:40:38][INFO] Shutting down DescriptorHeap...
-[14:40:38][INFO] DescriptorHeap shut down successfully
-[14:40:38][INFO] Shutting down SwapChain...
-[14:40:38][INFO] SwapChain shut down successfully
-[14:40:38][INFO] Shutting down CommandQueue...
-[14:40:38][INFO] CommandQueue shut down successfully
-[14:40:38][INFO] Shutting down Device...
-[14:40:38][INFO] ? Shutdown complete
-[14:40:38][INFO] ===========================================
-[14:40:38][INFO] Athena Renderer - Log Ended
-[14:40:38][INFO] ===========================================
+[16:56:09][INFO] ===========================================
+[16:56:09][INFO] Athena Renderer - Log Started
+[16:56:09][INFO] ===========================================
+[16:56:09][INFO] ==========================================================
+[16:56:09][INFO]   Athena Renderer - RenderGraph Integration
+[16:56:09][INFO] ==========================================================
+[16:56:09][INFO] ? Window created
+[16:56:09][INFO] Initializing Device...
+[16:56:09][INFO] D3D12 Debug Layer enabled
+[16:56:09][INFO] Selected GPU: NVIDIA GeForce GTX 1660 SUPER
+[16:56:09][INFO] VRAM: 5.83 GB
+[16:56:09][INFO] Feature Support:
+[16:56:09][INFO]   Mesh Shaders: Yes
+[16:56:09][INFO]   Raytracing: Yes
+[16:56:09][INFO]   VRS: Yes
+[16:56:09][INFO] Device initialized successfully
+[16:56:09][INFO] ? Device initialized
+[16:56:09][INFO] === RenderGraph基盤テスト開始 ===
+[16:56:09][INFO] ===== RenderGraph Integration Test Start =====
+[16:56:09][INFO] === ResourceHandle Test Start ===
+[16:56:09][INFO] ResourceDesc created:
+[16:56:09][INFO]   - Size: {}x{}
+[16:56:09][INFO]   - Format: {}
+[16:56:09][INFO]   - Name: {}
+[16:56:09][INFO] Usage flags:
+[16:56:09][INFO]   - RenderTarget: {}
+[16:56:09][INFO]   - ShaderResource: {}
+[16:56:09][INFO]   - UnorderedAccess: {}
+[16:56:09][INFO] === ResourceHandle Test Complete ===
+[16:56:09][INFO] === RenderPass Test Start ===
+[16:56:09][INFO] Pass info:
+[16:56:09][INFO]   - Name: {}
+[16:56:09][INFO]   - Description: {}
+[16:56:09][INFO]   - Category: {}
+[16:56:09][INFO] TestRenderPass::Setup called
+[16:56:09][INFO] Parameter test:
+[16:56:09][INFO]   - Float: {}
+[16:56:09][INFO]   - Int: {}
+[16:56:09][INFO]   - Bool: {}
+[16:56:09][INFO] TestRenderPass::Execute called
+[16:56:09][INFO] === RenderPass Test Complete ===
+[16:56:09][INFO] === RenderGraph Basic Test Start ===
+[16:56:09][INFO] RenderGraph initialized
+[16:56:09][INFO] Created texture resource: {} ({}x{}, format={})
+[16:56:09][INFO] Created texture resource: {} ({}x{}, format={})
+[16:56:09][INFO] Resource creation completed:
+[16:56:09][INFO]   - ColorTarget: {} (valid: {})
+[16:56:09][INFO]   - DepthTarget: {} (valid: {})
+[16:56:09][INFO] Set final output: {}
+[16:56:09][INFO] Compiling RenderGraph with {} passes
+[16:56:09][WARN] RenderGraph has no passes
+[16:56:09][INFO] Dependency analysis completed, execution order: {} passes
+[16:56:09][INFO] Pass culling completed, culled {} passes
+[16:56:09][INFO] Resource lifetime calculation completed
+[16:56:09][INFO] Transient resource allocation completed
+[16:56:09][INFO] RenderGraph compilation completed in {:.3f}ms
+[16:56:09][INFO] Compile result: {}
+[16:56:09][INFO] Statistics:
+[16:56:09][INFO]   - Total resources: {}
+[16:56:09][INFO]   - Transient resources: {}
+[16:56:09][INFO]   - External resources: {}
+[16:56:09][INFO]   - Compile time: {:.3f}ms
+[16:56:09][INFO] === RenderGraph Debug Info ===
+[16:56:09][INFO] Passes: {}
+[16:56:09][INFO] Resources: {}
+[16:56:09][INFO] Execution Order: {}
+[16:56:09][INFO] Final Outputs: {}
+[16:56:09][INFO] --- Passes ---
+[16:56:09][INFO] --- Resources ---
+[16:56:09][INFO]   [{}] {} ({}x{}, {})
+[16:56:09][INFO]   [{}] {} ({}x{}, {})
+[16:56:09][INFO] --- Statistics ---
+[16:56:09][INFO]   Compile Time: {:.3f}ms
+[16:56:09][INFO]   Execute Time: {:.3f}ms
+[16:56:09][INFO]   Memory Usage: {} bytes
+[16:56:09][INFO] Graphviz output: {}
+[16:56:09][INFO] === RenderGraph Basic Test Complete ===
+[16:56:09][INFO] RenderGraph cleared
+[16:56:09][INFO] RenderGraph destroyed
+[16:56:09][INFO] ===== RenderGraph Integration Test Complete: {} =====
+[16:56:09][INFO] === RenderGraph基盤テスト完了: {} ===
+[16:56:09][INFO] RenderGraph用テストジオメトリを準備
+[16:56:09][INFO] === RenderGraph統合例の初期化 ===
+[16:56:09][INFO] Render target texture created: 1280x720
+[16:56:09][INFO] Render target texture created: 1280x720
+[16:56:09][INFO] Depth stencil texture created: 1280x720
+[16:56:09][INFO] Render target texture created: 1280x720
+[16:56:09][INFO] RenderGraphExample: G-Buffer textures created successfully
+[16:56:09][INFO] RenderGraph initialized
+[16:56:09][INFO] GeometryPass: Setup started
+[16:56:09][INFO] GeometryPass: Root signature created
+[16:56:09][INFO] Shader compiled: ../shaders/GeometryVS.hlsl
+[16:56:09][INFO] Shader compiled: ../shaders/GeometryPS.hlsl
+[16:56:10][INFO] GeometryPass: Pipeline state created
+[16:56:10][INFO] Buffer initialized (size: 416 bytes, type: 2)
+[16:56:10][WARN] GeometryPass: No cached vertex data available during Setup
+[16:56:10][INFO] GeometryPass: Setup completed
+[16:56:10][INFO] RenderGraphExample: GeometryPass setup completed
+[16:56:10][INFO] LightingPass: Setup started
+[16:56:10][INFO] LightingPass: Root signature created
+[16:56:10][INFO] Shader compiled: ../shaders/LightingVS.hlsl
+[16:56:10][INFO] Shader compiled: ../shaders/LightingPS.hlsl
+[16:56:10][INFO] LightingPass: Pipeline state created
+[16:56:10][INFO] Buffer initialized (size: 544 bytes, type: 2)
+[16:56:10][INFO] LightingPass: Setup completed
+[16:56:10][INFO] RenderGraphExample: LightingPass setup completed
+[16:56:10][INFO] ToneMappingPass: Setup started
+[16:56:10][INFO] ToneMappingPass: Root signature created
+[16:56:10][INFO] Shader compiled: ../shaders/ToneMappingVS.hlsl
+[16:56:10][INFO] Shader compiled: ../shaders/ToneMappingPS.hlsl
+[16:56:10][INFO] ToneMappingPass: Pipeline state created
+[16:56:10][INFO] Buffer initialized (size: 256 bytes, type: 2)
+[16:56:10][INFO] ToneMappingPass: Setup completed
+[16:56:10][INFO] RenderGraphExample: ToneMappingPass setup completed
+[16:56:10][INFO] RenderGraphExample: RenderGraph built successfully
+[16:56:10][INFO] RenderGraphExample: Initialization completed
+[16:56:10][INFO] GeometryPass::SetVertexData: Vertex data cached (vertices: 3, indices: 3)
+[16:56:10][INFO] RenderGraph用テストジオメトリ設定完了
+[16:56:10][INFO] === RenderGraph統合例初期化: {} ===
+[16:56:10][INFO] Initializing CommandQueue...
+[16:56:10][INFO] CommandQueue initialized successfully
+[16:56:10][INFO] ? CommandQueue initialized
+[16:56:10][INFO] Initializing SwapChain (1280x720)...
+[16:56:10][INFO] Created 3 back buffers
+[16:56:10][INFO] SwapChain initialized successfully
+[16:56:10][INFO] ? SwapChain initialized
+[16:56:10][INFO] Initializing DescriptorHeap (type: 2, capacity: 3, shaderVisible: No)...
+[16:56:10][INFO] DescriptorHeap initialized (descriptor size: 32 bytes)
+[16:56:10][INFO] Initializing DescriptorHeap (type: 3, capacity: 1, shaderVisible: No)...
+[16:56:10][INFO] DescriptorHeap initialized (descriptor size: 8 bytes)
+[16:56:10][INFO] Initializing DescriptorHeap (type: 0, capacity: 10, shaderVisible: Yes)...
+[16:56:10][INFO] DescriptorHeap initialized (descriptor size: 32 bytes)
+[16:56:10][INFO] ? Descriptor heaps created
+[16:56:10][INFO] ? RTVs created
+[16:56:10][INFO] Depth stencil texture created: 1280x720
+[16:56:10][INFO] ? Depth buffer created
+[16:56:10][INFO] ? Command allocator and list created
+[16:56:10][INFO] UploadContext initialized
+[16:56:10][INFO] ==========================================================
+[16:56:10][INFO]   Loading texture from file...
+[16:56:10][INFO] ==========================================================
+[16:56:10][INFO] Loading texture from file: ../assets/Sunamerikun.png
+[16:56:10][INFO]   Size: 1280x1280
+[16:56:10][INFO]   Format: 91
+[16:56:10][INFO]   Mip levels in file: 1
+[16:56:10][INFO]   Generating mipmaps...
+[16:56:10][INFO]   Generated 11 mip levels
+[16:56:10][INFO] ? Texture loaded successfully: ../assets/Sunamerikun.png
+[16:56:10][INFO] ? Texture loaded from file!
+[16:56:10][INFO] ? Descriptors allocated:
+[16:56:10][INFO]   - CBV at index 0
+[16:56:10][INFO]   - SRV at index 1
+[16:56:10][INFO] Buffer initialized (size: 480 bytes, type: 0)
+[16:56:10][INFO] Buffer initialized (size: 144 bytes, type: 1)
+[16:56:10][INFO] Buffer initialized (size: 8820 bytes, type: 0)
+[16:56:10][INFO] Buffer initialized (size: 9600 bytes, type: 1)
+[16:56:10][INFO] Buffer initialized (size: 256 bytes, type: 2)
+[16:56:10][INFO] ? Buffers created
+[16:56:10][INFO] Vertex struct size: 20 bytes
+[16:56:10][INFO] Vector3 size: 12 bytes
+[16:56:10][INFO] Vector2 size: 8 bytes
+[16:56:10][INFO] First vertex: pos(-0.50,-0.50,0.50) uv(0.00,1.00)
+[16:56:10][INFO] ? CBV created
+[16:56:10][INFO] ? Texture SRV created
+[16:56:10][INFO] GeometryPass::SetVertexData: Vertex data cached (vertices: 24, indices: 36)
+[16:56:10][INFO] ? RenderGraph texture sharing (simplified)
+[16:56:10][INFO] ? RenderGraph vertex data and texture configured
+[16:56:10][INFO] Compiling shaders...
+[16:56:10][INFO] ? Shader compiled: ../shaders/TexturedVS.hlsl
+[16:56:10][INFO] ? Shader compiled: ../shaders/TexturedPS.hlsl
+[16:56:10][INFO] ? Root signature created
+[16:56:10][INFO] ? Pipeline state created
+[16:56:10][INFO] ==========================================================
+[16:56:10][INFO]   初期化完了！レンダリングループ開始
+[16:56:10][INFO]   ESC: 終了
+[16:56:10][INFO] ==========================================================
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] GeometryPass::SetVertexData: Vertex data cached (vertices: 24, indices: 36)
+[16:56:10][INFO] RenderGraph: Switched to Cube vertex data
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Updating buffers during Execute
+[16:56:10][INFO] Buffer initialized (size: 768 bytes, type: 0)
+[16:56:10][INFO] Buffer initialized (size: 144 bytes, type: 1)
+[16:56:10][INFO] GeometryPass: Buffers updated successfully (vertices: 24, indices: 36)
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] CBV GPU Handle: 10528416542556160, SRV GPU Handle: 10528416542556192
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] LightingPass: Directional light added (total: 1)
+[16:56:10][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:10][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:10][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:10][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:10][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 36 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] Display mode changed to: Sphere
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] GeometryPass::SetVertexData: Vertex data cached (vertices: 441, indices: 2400)
+[16:56:11][INFO] RenderGraph: Switched to Sphere vertex data
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Updating buffers during Execute
+[16:56:11][INFO] Buffer initialized (size: 14112 bytes, type: 0)
+[16:56:11][INFO] Buffer initialized (size: 9600 bytes, type: 1)
+[16:56:11][INFO] GeometryPass: Buffers updated successfully (vertices: 441, indices: 2400)
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] LightingPass: Directional light added (total: 1)
+[16:56:11][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:11][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:11][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:11][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:11][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] LightingPass: Directional light added (total: 1)
+[16:56:12][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:12][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:12][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:12][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:12][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] LightingPass: Directional light added (total: 1)
+[16:56:13][INFO] RenderGraphExample: Executing passes manually (simplified implementation)
+[16:56:13][INFO] RenderGraphExample: Executing GeometryPass
+[16:56:13][INFO] GeometryPass: Using shared texture SRV, ObjectID: 0
+[16:56:13][INFO] GeometryPass::Execute: Drew 2400 indices
+[16:56:13][INFO] RenderGraphExample: Frame rendered
+[16:56:13][INFO] ==========================================================
+[16:56:13][INFO]   終了処理開始
+[16:56:13][INFO] ==========================================================
+[16:56:13][INFO] Shutting down DescriptorHeap...
+[16:56:13][INFO] DescriptorHeap shut down successfully
+[16:56:13][INFO] Shutting down DescriptorHeap...
+[16:56:13][INFO] DescriptorHeap shut down successfully
+[16:56:13][INFO] Shutting down DescriptorHeap...
+[16:56:13][INFO] DescriptorHeap shut down successfully
+[16:56:13][INFO] Shutting down SwapChain...
+[16:56:13][INFO] SwapChain shut down successfully
+[16:56:13][INFO] Shutting down CommandQueue...
+[16:56:13][INFO] CommandQueue shut down successfully
+[16:56:13][INFO] Shutting down Device...
+[16:56:13][INFO] ? Shutdown complete
+[16:56:13][INFO] ===========================================
+[16:56:13][INFO] Athena Renderer - Log Ended
+[16:56:13][INFO] ===========================================

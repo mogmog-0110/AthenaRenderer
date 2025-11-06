@@ -10,25 +10,25 @@ namespace Athena {
 
     using Microsoft::WRL::ComPtr;
 
-    // ‘O•ûéŒ¾
+    // ï¿½Oï¿½ï¿½ï¿½éŒ¾
     class UploadContext;
 
     /**
-     * @brief ƒeƒNƒXƒ`ƒƒ‚Ìí—Ş
+     * @brief ï¿½eï¿½Nï¿½Xï¿½`ï¿½ï¿½ï¿½Ìï¿½ï¿½
      */
     enum class TextureType {
-        Texture2D,      // 2DƒeƒNƒXƒ`ƒƒ
-        TextureCube,    // ƒLƒ…[ƒuƒ}ƒbƒv
-        Texture3D,      // 3DƒeƒNƒXƒ`ƒƒ
-        RenderTarget,   // ƒŒƒ“ƒ_[ƒ^[ƒQƒbƒg
-        DepthStencil    // [“xƒXƒeƒ“ƒVƒ‹
+        Texture2D,      // 2Dï¿½eï¿½Nï¿½Xï¿½`ï¿½ï¿½
+        TextureCube,    // ï¿½Lï¿½ï¿½ï¿½[ï¿½uï¿½}ï¿½bï¿½v
+        Texture3D,      // 3Dï¿½eï¿½Nï¿½Xï¿½`ï¿½ï¿½
+        RenderTarget,   // ï¿½ï¿½ï¿½ï¿½ï¿½_ï¿½[ï¿½^ï¿½[ï¿½Qï¿½bï¿½g
+        DepthStencil    // ï¿½[ï¿½xï¿½Xï¿½eï¿½ï¿½ï¿½Vï¿½ï¿½
     };
 
     /**
-     * @brief ƒeƒNƒXƒ`ƒƒ’ŠÛ‰»ƒNƒ‰ƒX
+     * @brief ï¿½eï¿½Nï¿½Xï¿½`ï¿½ï¿½ï¿½ï¿½ï¿½Û‰ï¿½ï¿½Nï¿½ï¿½ï¿½X
      *
-     * DirectXTex‚ğg—p‚µ‚Ä—lX‚ÈŒ`®‚Ì‰æ‘œƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚İA
-     * DirectX 12‚ÌƒeƒNƒXƒ`ƒƒƒŠƒ\[ƒX‚Æ‚µ‚ÄŠÇ—‚·‚é
+     * DirectXTexï¿½ï¿½ï¿½gï¿½pï¿½ï¿½ï¿½Ä—lï¿½Xï¿½ÈŒ`ï¿½ï¿½ï¿½Ì‰æ‘œï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½Ç‚İï¿½ï¿½İA
+     * DirectX 12ï¿½Ìƒeï¿½Nï¿½Xï¿½`ï¿½ï¿½ï¿½ï¿½ï¿½\ï¿½[ï¿½Xï¿½Æ‚ï¿½ï¿½ÄŠÇ—ï¿½ï¿½ï¿½ï¿½ï¿½
      */
     class Texture {
     public:
@@ -36,11 +36,11 @@ namespace Athena {
         ~Texture();
 
         /**
-         * @brief ‰æ‘œƒtƒ@ƒCƒ‹‚©‚ç“Ç‚İ‚İiNEW!j
-         * @param device DirectX 12ƒfƒoƒCƒX
-         * @param filepath ‰æ‘œƒtƒ@ƒCƒ‹ƒpƒXi.png, .jpg, .dds“™j
-         * @param uploadContext ƒAƒbƒvƒ[ƒhƒRƒ“ƒeƒLƒXƒg
-         * @param generateMips ƒ~ƒbƒvƒ}ƒbƒv‚ğ©“®¶¬‚·‚é‚©
+         * @brief ï¿½æ‘œï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç‚İï¿½ï¿½İiNEW!ï¿½j
+         * @param device DirectX 12ï¿½fï¿½oï¿½Cï¿½X
+         * @param filepath ï¿½æ‘œï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½pï¿½Xï¿½i.png, .jpg, .ddsï¿½ï¿½ï¿½j
+         * @param uploadContext ï¿½Aï¿½bï¿½vï¿½ï¿½ï¿½[ï¿½hï¿½Rï¿½ï¿½ï¿½eï¿½Lï¿½Xï¿½g
+         * @param generateMips ï¿½~ï¿½bï¿½vï¿½}ï¿½bï¿½vï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½é‚©
          */
         void LoadFromFile(
             ID3D12Device* device,
@@ -50,20 +50,20 @@ namespace Athena {
         );
 
         /**
-         * @brief GPU‚ÉƒeƒNƒXƒ`ƒƒ‚ğƒAƒbƒvƒ[ƒh
-         * @param uploadContext ƒAƒbƒvƒ[ƒhƒRƒ“ƒeƒLƒXƒg
+         * @brief GPUï¿½Éƒeï¿½Nï¿½Xï¿½`ï¿½ï¿½ï¿½ï¿½ï¿½Aï¿½bï¿½vï¿½ï¿½ï¿½[ï¿½h
+         * @param uploadContext ï¿½Aï¿½bï¿½vï¿½ï¿½ï¿½[ï¿½hï¿½Rï¿½ï¿½ï¿½eï¿½Lï¿½Xï¿½g
          *
-         * LoadFromFile()‚ÌŒã‚ÉŒÄ‚Ño‚µ‚ÄAÀÛ‚ÉGPU‚Éƒf[ƒ^‚ğ“]‘—‚·‚é
+         * LoadFromFile()ï¿½ÌŒï¿½ÉŒÄ‚Ñoï¿½ï¿½ï¿½ÄAï¿½ï¿½ï¿½Û‚ï¿½GPUï¿½Éƒfï¿½[ï¿½^ï¿½ï¿½]ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
          */
         void UploadToGPU(UploadContext* uploadContext);
 
         /**
-         * @brief ƒƒ‚ƒŠ‚©‚çƒeƒNƒXƒ`ƒƒ‚ğì¬
-         * @param device DirectX 12ƒfƒoƒCƒX
-         * @param width ƒeƒNƒXƒ`ƒƒ•
-         * @param height ƒeƒNƒXƒ`ƒƒ‚‚³
-         * @param format ƒsƒNƒZƒ‹ƒtƒH[ƒ}ƒbƒg
-         * @param data ‰æ‘œƒf[ƒ^
+         * @brief ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½eï¿½Nï¿½Xï¿½`ï¿½ï¿½ï¿½ï¿½ï¿½ì¬
+         * @param device DirectX 12ï¿½fï¿½oï¿½Cï¿½X
+         * @param width ï¿½eï¿½Nï¿½Xï¿½`ï¿½ï¿½ï¿½ï¿½
+         * @param height ï¿½eï¿½Nï¿½Xï¿½`ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+         * @param format ï¿½sï¿½Nï¿½Zï¿½ï¿½ï¿½tï¿½Hï¿½[ï¿½}ï¿½bï¿½g
+         * @param data ï¿½æ‘œï¿½fï¿½[ï¿½^
          */
         void CreateFromMemory(
             ID3D12Device* device,
@@ -74,7 +74,7 @@ namespace Athena {
         );
 
         /**
-         * @brief ƒŒƒ“ƒ_[ƒ^[ƒQƒbƒg—pƒeƒNƒXƒ`ƒƒ‚ğì¬
+         * @brief ï¿½ï¿½ï¿½ï¿½ï¿½_ï¿½[ï¿½^ï¿½[ï¿½Qï¿½bï¿½gï¿½pï¿½eï¿½Nï¿½Xï¿½`ï¿½ï¿½ï¿½ï¿½ï¿½ì¬
          */
         void CreateRenderTarget(
             ID3D12Device* device,
@@ -84,7 +84,7 @@ namespace Athena {
         );
 
         /**
-         * @brief [“xƒXƒeƒ“ƒVƒ‹—pƒeƒNƒXƒ`ƒƒ‚ğì¬
+         * @brief ï¿½[ï¿½xï¿½Xï¿½eï¿½ï¿½ï¿½Vï¿½ï¿½ï¿½pï¿½eï¿½Nï¿½Xï¿½`ï¿½ï¿½ï¿½ï¿½ï¿½ì¬
          */
         void CreateDepthStencil(
             ID3D12Device* device,
@@ -93,41 +93,45 @@ namespace Athena {
         );
 
         /**
-         * @brief ƒeƒNƒXƒ`ƒƒ‚ÌI—¹ˆ—
+         * @brief ï¿½eï¿½Nï¿½Xï¿½`ï¿½ï¿½ï¿½ÌIï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
          */
         void Shutdown();
 
         /**
-         * @brief Shader Resource View‚ğì¬
-         * @param device DirectX 12ƒfƒoƒCƒX
-         * @param cpuHandle SRV‚ğì¬‚·‚éƒfƒXƒNƒŠƒvƒ^ƒnƒ“ƒhƒ‹
+         * @brief Shader Resource Viewï¿½ï¿½ï¿½ì¬
+         * @param device DirectX 12ï¿½fï¿½oï¿½Cï¿½X
+         * @param cpuHandle SRVï¿½ï¿½ï¿½ì¬ï¿½ï¿½ï¿½ï¿½fï¿½Xï¿½Nï¿½ï¿½ï¿½vï¿½^ï¿½nï¿½ï¿½ï¿½hï¿½ï¿½
          */
         void CreateSRV(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle);
 
         /**
-         * @brief Render Target View‚ğì¬
-         * @param device DirectX 12ƒfƒoƒCƒX
-         * @param cpuHandle RTV‚ğì¬‚·‚éƒfƒXƒNƒŠƒvƒ^ƒnƒ“ƒhƒ‹
+         * @brief Render Target Viewï¿½ï¿½ï¿½ì¬
+         * @param device DirectX 12ï¿½fï¿½oï¿½Cï¿½X
+         * @param cpuHandle RTVï¿½ï¿½ï¿½ì¬ï¿½ï¿½ï¿½ï¿½fï¿½Xï¿½Nï¿½ï¿½ï¿½vï¿½^ï¿½nï¿½ï¿½ï¿½hï¿½ï¿½
          */
         void CreateRTV(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle);
 
         /**
-         * @brief Depth Stencil View‚ğì¬
-         * @param device DirectX 12ƒfƒoƒCƒX
-         * @param cpuHandle DSV‚ğì¬‚·‚éƒfƒXƒNƒŠƒvƒ^ƒnƒ“ƒhƒ‹
+         * @brief Depth Stencil Viewï¿½ï¿½ï¿½ì¬
+         * @param device DirectX 12ï¿½fï¿½oï¿½Cï¿½X
+         * @param cpuHandle DSVï¿½ï¿½ï¿½ì¬ï¿½ï¿½ï¿½ï¿½fï¿½Xï¿½Nï¿½ï¿½ï¿½vï¿½^ï¿½nï¿½ï¿½ï¿½hï¿½ï¿½
          */
         void CreateDSV(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle);
 
-        // ƒAƒNƒZƒT
+        // ï¿½Aï¿½Nï¿½Zï¿½T
         ID3D12Resource* GetResource() const { return resource.Get(); }
         uint32_t GetWidth() const { return width; }
         uint32_t GetHeight() const { return height; }
         DXGI_FORMAT GetFormat() const { return format; }
         TextureType GetType() const { return type; }
+        
+        // ã‚¿ã‚¤ãƒ—ãƒã‚§ãƒƒã‚¯
+        bool IsRenderTarget() const { return type == TextureType::RenderTarget; }
+        bool IsDepthStencil() const { return type == TextureType::DepthStencil; }
 
     private:
         ComPtr<ID3D12Resource> resource;
-        ComPtr<ID3D12Resource> uploadBuffer; // ƒAƒbƒvƒ[ƒh—pˆêƒoƒbƒtƒ@
+        ComPtr<ID3D12Resource> uploadBuffer; // ï¿½Aï¿½bï¿½vï¿½ï¿½ï¿½[ï¿½hï¿½pï¿½êï¿½oï¿½bï¿½tï¿½@
 
         uint32_t width = 0;
         uint32_t height = 0;
@@ -135,7 +139,7 @@ namespace Athena {
         TextureType type = TextureType::Texture2D;
         uint32_t mipLevels = 1;
 
-        // DirectXTex‚Ìˆê‰æ‘œƒf[ƒ^iƒAƒbƒvƒ[ƒh‘Oj
+        // DirectXTexï¿½Ìˆêï¿½æ‘œï¿½fï¿½[ï¿½^ï¿½iï¿½Aï¿½bï¿½vï¿½ï¿½ï¿½[ï¿½hï¿½Oï¿½j
         DirectX::ScratchImage tempImageData;
 
         void CreateResource(

@@ -21,29 +21,23 @@ namespace Athena {
 
         Logger::Info("Loading texture from file: %S", filepath);
 
-        // DirectXTexを使って画像を読み込み
         DirectX::ScratchImage scratchImage;
         HRESULT hr;
 
-        // ファイル拡張子から読み込み方法を判定
         std::wstring path(filepath);
         std::wstring ext = path.substr(path.find_last_of(L'.'));
         std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
 
         if (ext == L".dds") {
-            // DDS形式
             hr = DirectX::LoadFromDDSFile(filepath, DirectX::DDS_FLAGS_NONE, nullptr, scratchImage);
         }
         else if (ext == L".tga") {
-            // TGA形式
             hr = DirectX::LoadFromTGAFile(filepath, nullptr, scratchImage);
         }
         else if (ext == L".hdr") {
-            // HDR形式
             hr = DirectX::LoadFromHDRFile(filepath, nullptr, scratchImage);
         }
         else {
-            // WIC形式（PNG, JPG, BMP等）
             hr = DirectX::LoadFromWICFile(filepath, DirectX::WIC_FLAGS_NONE, nullptr, scratchImage);
         }
 
@@ -52,7 +46,6 @@ namespace Athena {
             throw std::runtime_error("Failed to load texture file");
         }
 
-        // メタデータ取得
         const DirectX::TexMetadata& metadata = scratchImage.GetMetadata();
         width = static_cast<uint32_t>(metadata.width);
         height = static_cast<uint32_t>(metadata.height);
@@ -62,7 +55,6 @@ namespace Athena {
         Logger::Info("  Format: %d", format);
         Logger::Info("  Mip levels in file: %zu", metadata.mipLevels);
 
-        // ミップマップ生成
         DirectX::ScratchImage mipChain;
         if (generateMips && metadata.mipLevels == 1) {
             Logger::Info("  Generating mipmaps...");
@@ -71,7 +63,7 @@ namespace Athena {
                 scratchImage.GetImageCount(),
                 scratchImage.GetMetadata(),
                 DirectX::TEX_FILTER_DEFAULT,
-                0, // すべてのミップレベルを生成
+                0,
                 mipChain
             );
 
@@ -89,7 +81,6 @@ namespace Athena {
             mipLevels = static_cast<uint32_t>(metadata.mipLevels);
         }
 
-        // D3D12リソースを作成
         D3D12_RESOURCE_DESC textureDesc = {};
         textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
         textureDesc.Width = width;
@@ -109,7 +100,7 @@ namespace Athena {
             &heapProps,
             D3D12_HEAP_FLAG_NONE,
             &textureDesc,
-            D3D12_RESOURCE_STATE_COPY_DEST, // 初期状態はコピー先
+            D3D12_RESOURCE_STATE_COPY_DEST,
             nullptr,
             IID_PPV_ARGS(&resource)
         );
@@ -118,7 +109,6 @@ namespace Athena {
             throw std::runtime_error("Failed to create texture resource");
         }
 
-        // サブリソースデータを準備
         std::vector<D3D12_SUBRESOURCE_DATA> subresources(mipLevels);
         const DirectX::Image* images = scratchImage.GetImages();
 
@@ -128,11 +118,9 @@ namespace Athena {
             subresources[i].SlicePitch = images[i].slicePitch;
         }
 
-        // GPUにアップロード
         uploadContext->Begin();
         uploadContext->UploadTexture(resource.Get(), subresources.data(), mipLevels);
 
-        // COPY_DEST → PIXEL_SHADER_RESOURCE に遷移
         uploadContext->TransitionResource(
             resource.Get(),
             D3D12_RESOURCE_STATE_COPY_DEST,
@@ -150,7 +138,6 @@ namespace Athena {
             return;
         }
 
-        // サブリソースデータの準備
         std::vector<D3D12_SUBRESOURCE_DATA> subresources;
         for (size_t i = 0; i < tempImageData.GetImageCount(); ++i) {
             const DirectX::Image* img = tempImageData.GetImage(0, i, 0);
@@ -161,27 +148,22 @@ namespace Athena {
             subresources.push_back(subresource);
         }
 
-        // アップロード開始
         uploadContext->Begin();
 
-        // テクスチャデータをアップロード
         uploadContext->UploadTexture(
             resource.Get(),
             subresources.data(),
             static_cast<uint32_t>(subresources.size())
         );
 
-        // リソースバリア: COPY_DEST → PIXEL_SHADER_RESOURCE
         uploadContext->TransitionResource(
             resource.Get(),
             D3D12_RESOURCE_STATE_COPY_DEST,
             D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
         );
 
-        // アップロード完了を待機
         uploadContext->End();
 
-        // 一時データをクリア
         tempImageData.Release();
 
         Logger::Info("Texture uploaded to GPU successfully");
@@ -209,18 +191,15 @@ namespace Athena {
             nullptr
         );
 
-        // DirectXTexのScratchImageを作成
         DirectX::ScratchImage image;
         HRESULT hr = image.Initialize2D(format, width, height, 1, 1);
         if (FAILED(hr)) {
             throw std::runtime_error("Failed to initialize ScratchImage");
         }
 
-        // データをコピー
         const DirectX::Image* img = image.GetImage(0, 0, 0);
         memcpy(img->pixels, data, img->slicePitch);
 
-        // 一時保存
         tempImageData = std::move(image);
 
         Logger::Info("Texture created from memory: %dx%d", width, height);
