@@ -12,12 +12,14 @@ namespace Athena {
     void GeometryPass::Setup(PassSetupData& setupData) {
         Logger::Info("GeometryPass: Setup started");
 
-        // パイプライン状態を作成
-        CreateRootSignature(setupData.device);
-        CreatePipelineState(setupData.device);
-
         // デバイス参照を保存
         device = setupData.device;
+        
+        // ルートシグネチャを作成（共通）
+        CreateRootSignature(setupData.device);
+        
+        // パイプライン状態を作成（デフォルトはフォワード）
+        CreateForwardPipelineState(setupData.device);
 
         // バッファ初期化
         constantBuffer = std::make_unique<Buffer>();
@@ -42,6 +44,19 @@ namespace Athena {
     void GeometryPass::Execute(const PassExecuteData& executeData) {
         auto* commandList = executeData.commandList;
 
+        // レンダリングモードに応じてパイプライン状態を更新
+        static RenderMode lastMode = RenderMode::Forward;  // 初期値
+        if (renderMode != lastMode) {
+            if (renderMode == RenderMode::Forward) {
+                CreateForwardPipelineState(device);
+                Logger::Info("GeometryPass: Switched to Forward rendering mode");
+            } else {
+                CreateDeferredPipelineState(device);
+                Logger::Info("GeometryPass: Switched to Deferred rendering mode");
+            }
+            lastMode = renderMode;
+        }
+
         // バッファを更新（必要に応じて）
         if (buffersDirty && device) {
             Logger::Info("GeometryPass: Updating buffers during Execute");
@@ -59,6 +74,48 @@ namespace Athena {
         constants.lightColor = lightColor;
 
         constantBuffer->Upload(&constants, sizeof(GeometryConstants));
+
+        // レンダーターゲット設定（モード別）
+        if (renderMode == RenderMode::Deferred && gbufferRTVHandles[0].ptr != 0) {
+            // G-Buffer用レンダーターゲット設定（MRT）
+            // ハンドルは外部から設定済み
+            
+            // レンダーターゲットをクリア（リソース作成時の最適化クリア値と一致させる）
+            float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+            for (int i = 0; i < 3; ++i) {
+                if (gbufferRTVHandles[i].ptr != 0) {
+                    commandList->ClearRenderTargetView(gbufferRTVHandles[i], clearColor, 0, nullptr);
+                }
+            }
+            if (gbufferDSVHandle.ptr != 0) {
+                commandList->ClearDepthStencilView(gbufferDSVHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+            }
+            
+            // MRTを設定
+            D3D12_CPU_DESCRIPTOR_HANDLE* dsvPtr = (gbufferDSVHandle.ptr != 0) ? &gbufferDSVHandle : nullptr;
+            commandList->OMSetRenderTargets(3, gbufferRTVHandles, FALSE, dsvPtr);
+            
+            // ビューポートとシザー矩形を設定（G-Bufferのサイズに合わせる）
+            if (gbufferAlbedo) {
+                D3D12_VIEWPORT viewport = {};
+                viewport.TopLeftX = 0.0f;
+                viewport.TopLeftY = 0.0f;
+                viewport.Width = static_cast<float>(gbufferAlbedo->GetWidth());
+                viewport.Height = static_cast<float>(gbufferAlbedo->GetHeight());
+                viewport.MinDepth = 0.0f;
+                viewport.MaxDepth = 1.0f;
+                commandList->RSSetViewports(1, &viewport);
+                
+                D3D12_RECT scissorRect = {};
+                scissorRect.left = 0;
+                scissorRect.top = 0;
+                scissorRect.right = static_cast<LONG>(gbufferAlbedo->GetWidth());
+                scissorRect.bottom = static_cast<LONG>(gbufferAlbedo->GetHeight());
+                commandList->RSSetScissorRects(1, &scissorRect);
+            }
+            
+            Logger::Info("GeometryPass: G-Buffer render targets configured (MRT)");
+        }
 
         // パイプライン設定
         commandList->SetPipelineState(pipelineState.Get());
@@ -103,7 +160,8 @@ namespace Athena {
 
             // 描画
             commandList->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);
-            Logger::Info("GeometryPass::Execute: Drew %u indices", indexCount);
+            const char* modeStr = (renderMode == RenderMode::Forward) ? "Forward" : "Deferred";
+            Logger::Info("GeometryPass::Execute: Drew %u indices in %s mode", indexCount, modeStr);
         } else {
             Logger::Warning("GeometryPass::Execute: No valid vertex/index buffers to render (vb:%s, ib:%s, count:%u)", 
                           vertexBuffer ? "OK" : "NULL", 
@@ -214,18 +272,23 @@ namespace Athena {
     }
 
     void GeometryPass::CreatePipelineState(ID3D12Device* device) {
-        // シェーダーコンパイル
+        if (renderMode == RenderMode::Forward) {
+            CreateForwardPipelineState(device);
+        } else {
+            CreateDeferredPipelineState(device);
+        }
+    }
+
+    void GeometryPass::CreateForwardPipelineState(ID3D12Device* device) {
         auto vertexShader = CompileShader(L"../shaders/GeometryVS.hlsl", "main", "vs_5_1");
         auto pixelShader = CompileShader(L"../shaders/GeometryPS.hlsl", "main", "ps_5_1");
 
-        // 入力レイアウト
         D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
             {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
             {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
             {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
         };
 
-        // パイプライン状態記述
         D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
         psoDesc.pRootSignature = rootSignature.Get();
         psoDesc.VS = { vertexShader->GetBufferPointer(), vertexShader->GetBufferSize() };
@@ -246,13 +309,60 @@ namespace Athena {
         psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
         psoDesc.SampleDesc.Count = 1;
 
-        // パイプライン状態作成
         HRESULT hr = device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pipelineState));
         if (FAILED(hr)) {
-            throw std::runtime_error("Failed to create pipeline state");
+            throw std::runtime_error("Failed to create forward pipeline state");
         }
 
-        Logger::Info("GeometryPass: Pipeline state created");
+        Logger::Info("GeometryPass: Forward pipeline state created");
+    }
+
+    void GeometryPass::CreateDeferredPipelineState(ID3D12Device* device) {
+        auto vertexShader = CompileShader(L"../shaders/GeometryVS.hlsl", "main", "vs_5_1");
+        auto pixelShader = CompileShader(L"../shaders/GeometryDeferredPS.hlsl", "main", "ps_5_1");
+
+        D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
+            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+            {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+        };
+
+        // G-Buffer用のブレンド設定（3つのレンダーターゲット）
+        D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
+        psoDesc.pRootSignature = rootSignature.Get();
+        psoDesc.VS = { vertexShader->GetBufferPointer(), vertexShader->GetBufferSize() };
+        psoDesc.PS = { pixelShader->GetBufferPointer(), pixelShader->GetBufferSize() };
+        
+        // 3つのレンダーターゲット用のブレンド設定
+        for (int i = 0; i < 3; ++i) {
+            psoDesc.BlendState.RenderTarget[i].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+        }
+        
+        psoDesc.SampleMask = UINT_MAX;
+        psoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
+        psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+        psoDesc.RasterizerState.FrontCounterClockwise = FALSE;
+        psoDesc.RasterizerState.DepthClipEnable = TRUE;
+        psoDesc.DepthStencilState.DepthEnable = TRUE;
+        psoDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+        psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+        psoDesc.InputLayout = { inputLayout, _countof(inputLayout) };
+        psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+        
+        // Multiple Render Targets (MRT) for G-Buffer
+        psoDesc.NumRenderTargets = 3;
+        psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;  // Albedo + Metallic
+        psoDesc.RTVFormats[1] = DXGI_FORMAT_R8G8B8A8_UNORM;  // Normal + Roughness
+        psoDesc.RTVFormats[2] = DXGI_FORMAT_R8G8B8A8_UNORM;  // Material + ObjectID
+        psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+        psoDesc.SampleDesc.Count = 1;
+
+        HRESULT hr = device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pipelineState));
+        if (FAILED(hr)) {
+            throw std::runtime_error("Failed to create deferred pipeline state");
+        }
+
+        Logger::Info("GeometryPass: Deferred pipeline state created (G-Buffer MRT)");
     }
 
     ComPtr<ID3DBlob> GeometryPass::CompileShader(const std::wstring& filepath,

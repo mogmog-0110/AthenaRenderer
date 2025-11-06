@@ -1,4 +1,4 @@
-// Camera.h - ƒJƒƒ‰Šî’êƒNƒ‰ƒX
+// Camera.h - ï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Nï¿½ï¿½ï¿½X
 #pragma once
 
 #include "Athena/Utils/Math.h"
@@ -6,33 +6,33 @@
 namespace Athena {
 
     /**
-     * @brief ƒJƒƒ‰‚Ìí—Ş
+     * @brief ï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½Ìï¿½ï¿½
      */
     enum class CameraType {
-        FPS,        // ˆêlÌ‹“_ƒJƒƒ‰iWASDˆÚ“® + ƒ}ƒEƒX‰ñ“]j
-        Orbit       // ’‹“_’†SƒJƒƒ‰iƒ}ƒEƒXƒhƒ‰ƒbƒO‚Å‰ñ“]j
+        FPS,        // ï¿½ï¿½lï¿½Ìï¿½ï¿½_ï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½iWASDï¿½Ú“ï¿½ + ï¿½}ï¿½Eï¿½Xï¿½ï¿½]ï¿½j
+        Orbit       // ï¿½ï¿½ï¿½ï¿½ï¿½_ï¿½ï¿½ï¿½Sï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½iï¿½}ï¿½Eï¿½Xï¿½hï¿½ï¿½ï¿½bï¿½Oï¿½Å‰ï¿½]ï¿½j
     };
 
     /**
-     * @brief ƒJƒƒ‰Šî’êƒNƒ‰ƒX
+     * @brief ï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Nï¿½ï¿½ï¿½X
      *
-     * Views—ñ‚ÆProjections—ñ‚ğŠÇ—‚µA
-     * ƒJƒƒ‰‚ÌˆÊ’uEŒü‚«E‹–ìŠp‚È‚Ç‚ğ§Œä‚·‚é
+     * Viewï¿½sï¿½ï¿½ï¿½Projectionï¿½sï¿½ï¿½ï¿½ï¿½Ç—ï¿½ï¿½ï¿½ï¿½A
+     * ï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½ÌˆÊ’uï¿½Eï¿½ï¿½ï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½ï¿½pï¿½È‚Ç‚ğ§Œä‚·ï¿½ï¿½
      */
     class Camera {
     public:
         Camera();
         virtual ~Camera() = default;
 
-        // ===== XV =====
+        // ===== ï¿½Xï¿½V =====
         virtual void Update(float deltaTime) = 0;
 
-        // ===== s—ñæ“¾ =====
+        // ===== ï¿½sï¿½ï¿½æ“¾ =====
         Matrix4x4 GetViewMatrix() const { return viewMatrix; }
         Matrix4x4 GetProjectionMatrix() const { return projectionMatrix; }
         Matrix4x4 GetViewProjectionMatrix() const { return projectionMatrix * viewMatrix; }
 
-        // ===== ƒJƒƒ‰ƒpƒ‰ƒ[ƒ^ =====
+        // ===== ï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½pï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½^ =====
         Vector3 GetPosition() const { return position; }
         Vector3 GetForward() const { return forward; }
         Vector3 GetRight() const { return right; }
@@ -40,47 +40,47 @@ namespace Athena {
 
         void SetPosition(const Vector3& pos) { position = pos; UpdateViewMatrix(); }
 
-        // ===== ƒvƒƒWƒFƒNƒVƒ‡ƒ“İ’è =====
+        // ===== ï¿½vï¿½ï¿½ï¿½Wï¿½Fï¿½Nï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½İ’ï¿½ =====
         void SetPerspective(float fovY, float aspectRatio, float nearZ, float farZ);
         void SetOrthographic(float width, float height, float nearZ, float farZ);
 
-        // ===== ƒpƒ‰ƒ[ƒ^ƒAƒNƒZƒX =====
+        // ===== ï¿½pï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½^ï¿½Aï¿½Nï¿½Zï¿½X =====
         float GetFOV() const { return fov; }
         float GetNearZ() const { return nearZ; }
         float GetFarZ() const { return farZ; }
         float GetAspectRatio() const { return aspectRatio; }
 
     protected:
-        // ===== Views—ñXVi”h¶ƒNƒ‰ƒX‚ÅÀ‘•j =====
+        // ===== Viewï¿½sï¿½ï¿½Xï¿½Vï¿½iï¿½hï¿½ï¿½ï¿½Nï¿½ï¿½ï¿½Xï¿½Åï¿½ï¿½ï¿½ï¿½j =====
         virtual void UpdateViewMatrix() = 0;
 
-        // ===== ƒƒ“ƒo•Ï” =====
-        // ˆÊ’u‚Æ•ûŒü
+        // ===== ï¿½ï¿½ï¿½ï¿½ï¿½oï¿½Ïï¿½ =====
+        // ï¿½Ê’uï¿½Æ•ï¿½ï¿½ï¿½
         Vector3 position;
-        Vector3 forward;   // ‘O•ûŒüƒxƒNƒgƒ‹
-        Vector3 right;     // ‰E•ûŒüƒxƒNƒgƒ‹
-        Vector3 up;        // ã•ûŒüƒxƒNƒgƒ‹
+        Vector3 forward;   // ï¿½Oï¿½ï¿½ï¿½ï¿½ï¿½xï¿½Nï¿½gï¿½ï¿½
+        Vector3 right;     // ï¿½Eï¿½ï¿½ï¿½ï¿½ï¿½xï¿½Nï¿½gï¿½ï¿½
+        Vector3 up;        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½xï¿½Nï¿½gï¿½ï¿½
 
-        // s—ñ
+        // ï¿½sï¿½ï¿½
         Matrix4x4 viewMatrix;
         Matrix4x4 projectionMatrix;
 
-        // ƒvƒƒWƒFƒNƒVƒ‡ƒ“ƒpƒ‰ƒ[ƒ^
-        float fov;          // ‹–ìŠpiƒ‰ƒWƒAƒ“j
-        float aspectRatio;  // ƒAƒXƒyƒNƒg”ä
-        float nearZ;        // ƒjƒAƒNƒŠƒbƒv–Ê
-        float farZ;         // ƒtƒ@[ƒNƒŠƒbƒv–Ê
+        // ï¿½vï¿½ï¿½ï¿½Wï¿½Fï¿½Nï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½pï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½^
+        float fov;          // ï¿½ï¿½ï¿½ï¿½pï¿½iï¿½ï¿½ï¿½Wï¿½Aï¿½ï¿½ï¿½j
+        float aspectRatio;  // ï¿½Aï¿½Xï¿½yï¿½Nï¿½gï¿½ï¿½
+        float nearZ;        // ï¿½jï¿½Aï¿½Nï¿½ï¿½ï¿½bï¿½vï¿½ï¿½
+        float farZ;         // ï¿½tï¿½@ï¿½[ï¿½Nï¿½ï¿½ï¿½bï¿½vï¿½ï¿½
     };
 
     // =====================================================
-    // FPSƒJƒƒ‰iˆêlÌ‹“_j
+    // FPSï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½iï¿½ï¿½lï¿½Ìï¿½ï¿½_ï¿½j
     // =====================================================
     /**
-     * @brief FPSƒJƒƒ‰
+     * @brief FPSï¿½Jï¿½ï¿½ï¿½ï¿½
      *
-     * WASD: ˆÚ“®
-     * ƒ}ƒEƒX: ‹“_‰ñ“]
-     * Shift: ‚‘¬ˆÚ“®
+     * WASD: ï¿½Ú“ï¿½
+     * ï¿½}ï¿½Eï¿½X: ï¿½ï¿½ï¿½_ï¿½ï¿½]
+     * Shift: ï¿½ï¿½ï¿½ï¿½ï¿½Ú“ï¿½
      */
     class FPSCamera : public Camera {
     public:
@@ -88,29 +88,35 @@ namespace Athena {
 
         void Update(float deltaTime) override;
 
-        // ===== “ü—Íˆ— =====
+        // ===== ï¿½ï¿½ï¿½Íï¿½ï¿½ï¿½ =====
         void OnMouseMove(float deltaX, float deltaY);
+        void OnMouseScroll(float delta);
         void OnKeyPress(int key, bool isPressed);
 
-        // ===== ƒpƒ‰ƒ[ƒ^İ’è =====
+        // ===== ï¿½pï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½^ï¿½İ’ï¿½ =====
         void SetMoveSpeed(float speed) { moveSpeed = speed; }
         void SetRotationSpeed(float speed) { rotationSpeed = speed; }
         void SetMouseSensitivity(float sensitivity) { mouseSensitivity = sensitivity; }
+        
+        // ===== ãƒªã‚»ãƒƒãƒˆæ©Ÿèƒ½ =====
+        void ResetToDefaultPosition();
+        void ResetRotation();
 
     protected:
         void UpdateViewMatrix() override;
 
     private:
-        // ‰ñ“]Šp“xiƒIƒCƒ‰[Špj
-        float yaw;      // ƒˆ[iY²‰ñ“]j
-        float pitch;    // ƒsƒbƒ`iX²‰ñ“]j
+        // ï¿½ï¿½]ï¿½pï¿½xï¿½iï¿½Iï¿½Cï¿½ï¿½ï¿½[ï¿½pï¿½j
+        float yaw;      // ï¿½ï¿½ï¿½[ï¿½iYï¿½ï¿½ï¿½ï¿½]ï¿½j
+        float pitch;    // ï¿½sï¿½bï¿½`ï¿½iXï¿½ï¿½ï¿½ï¿½]ï¿½j
 
-        // ˆÚ“®‘¬“x
+        // ï¿½Ú“ï¿½ï¿½ï¿½ï¿½x
         float moveSpeed;
         float rotationSpeed;
         float mouseSensitivity;
+        float scrollSensitivity;
 
-        // “ü—Íó‘Ô
+        // ï¿½ï¿½ï¿½Íï¿½ï¿½
         bool moveForward;
         bool moveBackward;
         bool moveLeft;
@@ -121,14 +127,14 @@ namespace Athena {
     };
 
     // =====================================================
-    // ƒI[ƒrƒbƒgƒJƒƒ‰i’‹“_’†S‰ñ“]j
+    // ï¿½Iï¿½[ï¿½rï¿½bï¿½gï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½iï¿½ï¿½ï¿½ï¿½ï¿½_ï¿½ï¿½ï¿½Sï¿½ï¿½]ï¿½j
     // =====================================================
     /**
-     * @brief ƒI[ƒrƒbƒgƒJƒƒ‰
+     * @brief ï¿½Iï¿½[ï¿½rï¿½bï¿½gï¿½Jï¿½ï¿½ï¿½ï¿½
      *
-     * ƒ}ƒEƒXƒhƒ‰ƒbƒO: ‰ñ“]
-     * ƒzƒC[ƒ‹: ƒY[ƒ€
-     * í‚É’‹“_itargetj‚ğŒü‚­
+     * ï¿½}ï¿½Eï¿½Xï¿½hï¿½ï¿½ï¿½bï¿½O: ï¿½ï¿½]
+     * ï¿½zï¿½Cï¿½[ï¿½ï¿½: ï¿½Yï¿½[ï¿½ï¿½
+     * ï¿½ï¿½É’ï¿½ï¿½ï¿½ï¿½_ï¿½itargetï¿½jï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
      */
     class OrbitCamera : public Camera {
     public:
@@ -136,11 +142,11 @@ namespace Athena {
 
         void Update(float deltaTime) override;
 
-        // ===== “ü—Íˆ— =====
+        // ===== ï¿½ï¿½ï¿½Íï¿½ï¿½ï¿½ =====
         void OnMouseMove(float deltaX, float deltaY, bool isRotating);
         void OnMouseScroll(float delta);
 
-        // ===== ƒpƒ‰ƒ[ƒ^İ’è =====
+        // ===== ï¿½pï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½^ï¿½İ’ï¿½ =====
         void SetTarget(const Vector3& target) { this->target = target; UpdateViewMatrix(); }
         void SetDistance(float distance) { this->distance = distance; UpdateViewMatrix(); }
         void SetRotationSpeed(float speed) { rotationSpeed = speed; }
@@ -153,19 +159,19 @@ namespace Athena {
         void UpdateViewMatrix() override;
 
     private:
-        // ’‹“_
+        // ï¿½ï¿½ï¿½ï¿½ï¿½_
         Vector3 target;
 
-        // ‹ÉÀ•Wƒpƒ‰ƒ[ƒ^
-        float distance;     // ’‹“_‚©‚ç‚Ì‹——£
-        float yaw;          // ƒˆ[Šp
-        float pitch;        // ƒsƒbƒ`Šp
+        // ï¿½Éï¿½ï¿½Wï¿½pï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½^
+        float distance;     // ï¿½ï¿½ï¿½ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½Ì‹ï¿½ï¿½ï¿½
+        float yaw;          // ï¿½ï¿½ï¿½[ï¿½p
+        float pitch;        // ï¿½sï¿½bï¿½`ï¿½p
 
-        // ‘¬“x
+        // ï¿½ï¿½ï¿½x
         float rotationSpeed;
         float zoomSpeed;
 
-        // §ŒÀ
+        // ï¿½ï¿½ï¿½ï¿½
         float minDistance;
         float maxDistance;
         float minPitch;

@@ -243,11 +243,11 @@ namespace Athena {
 
         this->width = width;
         this->height = height;
-        this->format = DXGI_FORMAT_D32_FLOAT;
+        this->format = DXGI_FORMAT_R32_TYPELESS;  // SRVとして読み取り可能にする
         this->type = TextureType::DepthStencil;
 
         D3D12_CLEAR_VALUE clearValue = {};
-        clearValue.Format = DXGI_FORMAT_D32_FLOAT;
+        clearValue.Format = DXGI_FORMAT_D32_FLOAT;  // DSVフォーマット
         clearValue.DepthStencil.Depth = 1.0f;
         clearValue.DepthStencil.Stencil = 0;
 
@@ -255,7 +255,7 @@ namespace Athena {
             device,
             width,
             height,
-            DXGI_FORMAT_D32_FLOAT,
+            DXGI_FORMAT_R32_TYPELESS,  // リソースはTypelessで作成
             D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL,
             D3D12_RESOURCE_STATE_DEPTH_WRITE,
             &clearValue
@@ -272,7 +272,14 @@ namespace Athena {
 
     void Texture::CreateSRV(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle) {
         D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-        srvDesc.Format = format;
+        
+        // 深度テクスチャの場合は R32_FLOAT フォーマットを使用
+        if (type == TextureType::DepthStencil && format == DXGI_FORMAT_R32_TYPELESS) {
+            srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+        } else {
+            srvDesc.Format = format;
+        }
+        
         srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
         srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
         srvDesc.Texture2D.MipLevels = 1;

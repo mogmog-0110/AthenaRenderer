@@ -5,6 +5,7 @@
 #include "Athena/RenderGraph/ToneMappingPass.h"
 #include "Athena/RenderGraph/RenderPass.h"
 #include "Athena/Core/Device.h"
+#include "Athena/Core/DescriptorHeap.h"
 #include "Athena/Resources/Texture.h"
 #include "Athena/Utils/Logger.h"
 #include <memory>
@@ -39,6 +40,9 @@ public:
 
             // G-Bufferテクスチャを作成
             CreateGBufferTextures();
+            
+            // G-Bufferデスクリプタヒープを作成
+            CreateGBufferDescriptorHeaps();
 
             // RenderGraphを構築
             BuildRenderGraph();
@@ -58,17 +62,11 @@ public:
     void Render(ID3D12GraphicsCommandList* commandList, 
                 ID3D12DescriptorHeap* srvHeap,
                 D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle,
-                D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle) {
+                D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle,
+                bool useDeferredRendering = false) {
         
         if (!renderGraph) {
             Logger::Warning("RenderGraphExample: RenderGraph not initialized");
-            return;
-        }
-
-        // 現在のシンプル実装では、パスを個別に実行
-        Logger::Info("RenderGraphExample: Executing passes manually (simplified implementation)");
-        if (!geometryPass) {
-            Logger::Warning("RenderGraphExample: GeometryPass not available");
             return;
         }
 
@@ -78,24 +76,47 @@ public:
             executeData.commandList = commandList;
             executeData.srvHeap = srvHeap;
 
-            // 各レンダーパスを順次実行（暫定的にGeometryPassのみ）
-            if (geometryPass) {
-                Logger::Info("RenderGraphExample: Executing GeometryPass");
-                geometryPass->Execute(executeData);
+            if (useDeferredRendering) {
+                // ディファードレンダリングパイプライン
+                Logger::Info("RenderGraphExample: Executing Deferred Rendering Pipeline");
+                
+                // G-BufferモードでGeometryPass実行
+                if (geometryPass) {
+                    geometryPass->SetRenderMode(GeometryPass::RenderMode::Deferred);
+                    geometryPass->SetGBufferTargets(gbufferAlbedo, gbufferNormal, gbufferMaterial);
+                    geometryPass->SetGBufferDepth(gbufferDepth);
+                    geometryPass->SetGBufferRTVHandles(gbufferRTVHandles);
+                    geometryPass->SetGBufferDSVHandle(gbufferDSVHandle);
+                    Logger::Info("RenderGraphExample: Executing GeometryPass (G-Buffer generation)");
+                    geometryPass->Execute(executeData);
+                }
+                
+                // LightingPass実行（G-Bufferからライティング）
+                if (lightingPass) {
+                    // レンダーターゲットを最終出力（スワップチェーン）に設定
+                    commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
+                    
+                    // G-Buffer SRVヒープに変更
+                    PassExecuteData lightingData = executeData;
+                    lightingData.srvHeap = gbufferSRVHeap->GetD3D12DescriptorHeap();
+                    
+                    lightingPass->SetGBuffer(gbufferAlbedo, gbufferNormal, gbufferDepth);
+                    Logger::Info("RenderGraphExample: Executing LightingPass (Deferred Lighting)");
+                    lightingPass->Execute(lightingData);
+                }
+            } else {
+                // フォワードレンダリングパイプライン
+                Logger::Info("RenderGraphExample: Executing Forward Rendering Pipeline");
+                
+                // フォワードレンダリング用のレンダーターゲット設定
+                commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
+                
+                if (geometryPass) {
+                    geometryPass->SetRenderMode(GeometryPass::RenderMode::Forward);
+                    Logger::Info("RenderGraphExample: Executing GeometryPass (Forward rendering)");
+                    geometryPass->Execute(executeData);
+                }
             }
-            
-            // G-Bufferセットアップが完了次第、LightingPassとToneMappingPassを有効化
-            /*
-            if (lightingPass) {
-                Logger::Info("RenderGraphExample: Executing LightingPass");
-                lightingPass->Execute(executeData);
-            }
-            
-            if (toneMappingPass) {
-                Logger::Info("RenderGraphExample: Executing ToneMappingPass");
-                toneMappingPass->Execute(executeData);
-            }
-            */
 
             Logger::Info("RenderGraphExample: Frame rendered");
         }
@@ -154,6 +175,21 @@ public:
             geometryPass->SetObjectID(objectID);
         }
     }
+
+    /**
+     * @brief レンダリングモードを設定
+     */
+    void SetRenderingMode(bool useDeferred) {
+        deferredMode = useDeferred;
+    }
+
+    /**
+     * @brief G-Bufferテクスチャを取得
+     */
+    std::shared_ptr<Texture> GetGBufferAlbedo() const { return gbufferAlbedo; }
+    std::shared_ptr<Texture> GetGBufferNormal() const { return gbufferNormal; }
+    std::shared_ptr<Texture> GetGBufferMaterial() const { return gbufferMaterial; }
+    std::shared_ptr<Texture> GetGBufferDepth() const { return gbufferDepth; }
 
 private:
     /**
@@ -217,6 +253,14 @@ private:
                 DXGI_FORMAT_R8G8B8A8_UNORM
             );
 
+            // マテリアルパラメータバッファ
+            gbufferMaterial = std::make_shared<Texture>();
+            gbufferMaterial->CreateRenderTarget(
+                device->GetD3D12Device(),
+                width, height,
+                DXGI_FORMAT_R8G8B8A8_UNORM
+            );
+
             // 深度バッファ
             gbufferDepth = std::make_shared<Texture>();
             gbufferDepth->CreateDepthStencil(
@@ -238,6 +282,61 @@ private:
             Logger::Error("RenderGraphExample: Failed to create G-Buffer textures: %s", e.what());
         }
     }
+    
+    /**
+     * @brief G-Bufferデスクリプタヒープとビューを作成
+     */
+    void CreateGBufferDescriptorHeaps() {
+        if (!device) return;
+        
+        try {
+            // RTVヒープ作成 (3個のG-Bufferレンツーターゲット用)
+            gbufferRTVHeap = std::make_unique<DescriptorHeap>();
+            gbufferRTVHeap->Initialize(device->GetD3D12Device(), D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 3, false);
+            
+            // DSVヒープ作成 (深度バッファ用)
+            gbufferDSVHeap = std::make_unique<DescriptorHeap>();
+            gbufferDSVHeap->Initialize(device->GetD3D12Device(), D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
+            
+            // SRVヒープ作成 (G-Buffer読み取り用)
+            gbufferSRVHeap = std::make_unique<DescriptorHeap>();
+            gbufferSRVHeap->Initialize(device->GetD3D12Device(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 3, true);
+            gbufferSRVGPUStart = gbufferSRVHeap->GetD3D12DescriptorHeap()->GetGPUDescriptorHandleForHeapStart();
+            
+            // RTVを作成
+            auto albedoHandle = gbufferRTVHeap->Allocate();
+            gbufferAlbedo->CreateRTV(device->GetD3D12Device(), albedoHandle.cpu);
+            gbufferRTVHandles[0] = albedoHandle.cpu;
+            
+            auto normalHandle = gbufferRTVHeap->Allocate();
+            gbufferNormal->CreateRTV(device->GetD3D12Device(), normalHandle.cpu);
+            gbufferRTVHandles[1] = normalHandle.cpu;
+            
+            auto materialHandle = gbufferRTVHeap->Allocate();
+            gbufferMaterial->CreateRTV(device->GetD3D12Device(), materialHandle.cpu);
+            gbufferRTVHandles[2] = materialHandle.cpu;
+            
+            // DSVを作成
+            auto depthHandle = gbufferDSVHeap->Allocate();
+            gbufferDepth->CreateDSV(device->GetD3D12Device(), depthHandle.cpu);
+            gbufferDSVHandle = depthHandle.cpu;
+            
+            // SRVを作成 (LightingPass用)
+            auto albedoSRV = gbufferSRVHeap->Allocate();
+            gbufferAlbedo->CreateSRV(device->GetD3D12Device(), albedoSRV.cpu);
+            
+            auto normalSRV = gbufferSRVHeap->Allocate();
+            gbufferNormal->CreateSRV(device->GetD3D12Device(), normalSRV.cpu);
+            
+            auto depthSRV = gbufferSRVHeap->Allocate();
+            gbufferDepth->CreateSRV(device->GetD3D12Device(), depthSRV.cpu);
+            
+            Logger::Info("RenderGraphExample: G-Buffer descriptor heaps and views created successfully");
+        }
+        catch (const std::exception& e) {
+            Logger::Error("RenderGraphExample: Failed to create G-Buffer descriptor heaps: %s", e.what());
+        }
+    }
 
 private:
     std::shared_ptr<Device> device;
@@ -255,8 +354,20 @@ private:
     // G-Bufferテクスチャ
     std::shared_ptr<Texture> gbufferAlbedo;
     std::shared_ptr<Texture> gbufferNormal;
+    std::shared_ptr<Texture> gbufferMaterial;  // 追加したマテリアルバッファ
     std::shared_ptr<Texture> gbufferDepth;
     std::shared_ptr<Texture> hdrTexture;
+    
+    // G-Bufferデスクリプタヒープとハンドル
+    std::unique_ptr<DescriptorHeap> gbufferRTVHeap;
+    std::unique_ptr<DescriptorHeap> gbufferDSVHeap;
+    std::unique_ptr<DescriptorHeap> gbufferSRVHeap;
+    D3D12_CPU_DESCRIPTOR_HANDLE gbufferRTVHandles[3] = {};
+    D3D12_CPU_DESCRIPTOR_HANDLE gbufferDSVHandle = {};
+    D3D12_GPU_DESCRIPTOR_HANDLE gbufferSRVGPUStart = {};
+    
+    // レンダリングモード
+    bool deferredMode = false;
 };
 
 } // namespace Athena
@@ -266,7 +377,9 @@ bool InitializeRenderGraphExample(std::shared_ptr<Athena::Device> device, uint32
 void RenderWithRenderGraph(ID3D12GraphicsCommandList* commandList, 
                           ID3D12DescriptorHeap* srvHeap,
                           D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle,
-                          D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle);
+                          D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle,
+                          bool useDeferredRendering = false);
+void SetRenderGraphMode(bool useDeferred);
 void SetRenderGraphSceneData(const Athena::Matrix4x4& world, const Athena::Matrix4x4& view, const Athena::Matrix4x4& proj,
                            const Athena::Vector3& cameraPos, const Athena::Vector3& lightDir, const Athena::Vector3& lightColor);
 
@@ -281,9 +394,16 @@ bool InitializeRenderGraphExample(std::shared_ptr<Athena::Device> device, uint32
 void RenderWithRenderGraph(ID3D12GraphicsCommandList* commandList, 
                           ID3D12DescriptorHeap* srvHeap,
                           D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle,
-                          D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle) {
+                          D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle,
+                          bool useDeferredRendering) {
     if (g_renderGraphExample) {
-        g_renderGraphExample->Render(commandList, srvHeap, rtvHandle, dsvHandle);
+        g_renderGraphExample->Render(commandList, srvHeap, rtvHandle, dsvHandle, useDeferredRendering);
+    }
+}
+
+void SetRenderGraphMode(bool useDeferred) {
+    if (g_renderGraphExample) {
+        g_renderGraphExample->SetRenderingMode(useDeferred);
     }
 }
 

@@ -54,6 +54,7 @@ namespace Athena {
         , moveSpeed(5.0f)
         , rotationSpeed(0.1f)
         , mouseSensitivity(0.002f)
+        , scrollSensitivity(0.5f)
         , moveForward(false)
         , moveBackward(false)
         , moveLeft(false)
@@ -62,7 +63,7 @@ namespace Athena {
         , moveDown(false)
         , isSprinting(false)
     {
-        position = Vector3(0.0f, 2.0f, -5.0f);
+        position = Vector3(-3.0f, 0.0f, 0.0f);  // オブジェクトの横から見る最適な位置
         UpdateViewMatrix();
     }
 
@@ -73,12 +74,12 @@ namespace Athena {
             speed *= 3.0f;
         }
 
-        // WASD移動
+        // WASD移動（AとDキーを交換）
         Vector3 movement(0.0f, 0.0f, 0.0f);
         if (moveForward)  movement = movement + forward * speed;
         if (moveBackward) movement = movement - forward * speed;
-        if (moveRight)    movement = movement + right * speed;
-        if (moveLeft)     movement = movement - right * speed;
+        if (moveLeft)     movement = movement + right * speed;  // Aキー：右に移動
+        if (moveRight)    movement = movement - right * speed;  // Dキー：左に移動
 
         // 上下移動（Space/Ctrl）
         if (moveUp)   movement.y += speed;
@@ -88,10 +89,46 @@ namespace Athena {
         UpdateViewMatrix();
     }
 
+    void FPSCamera::OnMouseScroll(float delta) {
+        // マウスホイールでFOVを調整（ズーム効果）
+        fov -= delta * scrollSensitivity * 0.1f;
+        
+        // FOVを10度から120度に制限
+        const float minFOV = 3.14159f / 18.0f;  // 10度
+        const float maxFOV = 3.14159f * 2.0f / 3.0f;  // 120度
+        fov = std::clamp(fov, minFOV, maxFOV);
+        
+        // プロジェクション行列を更新
+        projectionMatrix = Matrix4x4::Perspective(fov, aspectRatio, nearZ, farZ);
+        
+        Logger::Info("FPSCamera: FOV changed to %.1f degrees", fov * 180.0f / 3.14159f);
+    }
+
+    void FPSCamera::ResetToDefaultPosition() {
+        // 位置と回転をデフォルト値にリセット
+        position = Vector3(-3.0f, 0.0f, 0.0f);
+        yaw = 0.0f;
+        pitch = 0.0f;
+        
+        // FOVもデフォルトに戻す
+        fov = 3.14159f / 4.0f;  // 45度
+        projectionMatrix = Matrix4x4::Perspective(fov, aspectRatio, nearZ, farZ);
+        
+        UpdateViewMatrix();
+        Logger::Info("FPSCamera: Reset to default position (-3, 0, 0) with default rotation and FOV");
+    }
+
+    void FPSCamera::ResetRotation() {
+        yaw = 0.0f;
+        pitch = 0.0f;
+        UpdateViewMatrix();
+        Logger::Info("FPSCamera: Rotation reset to default");
+    }
+
     void FPSCamera::OnMouseMove(float deltaX, float deltaY) {
-        // マウス移動量を角度変化に変換
-        yaw += deltaX * mouseSensitivity;
-        pitch += deltaY * mouseSensitivity;
+        // マウス移動量を角度変化に変換（左右とY軸の向きを修正）
+        yaw -= deltaX * mouseSensitivity;  // 左右反転を修正
+        pitch -= deltaY * mouseSensitivity; // 上下反転を修正
 
         // ピッチ角を-89度〜+89度に制限（真上・真下を向きすぎないように）
         const float maxPitch = 1.553f;  // 約89度

@@ -72,16 +72,16 @@ float3 CalculatePBR(float3 albedo, float3 normal, float metallic, float roughnes
     return (diffuse + specular) * lightColor * NdotL * attenuation;
 }
 
-// ワールド座標の復元
+// ワールド座標の復元（簡易版）
 float3 ReconstructWorldPosition(float2 screenPos, float depth)
 {
-    // 簡易的な逆投影変換（実際にはビュー・プロジェクション逆行列が必要）
-    // ここでは近似値を使用
-    float4 clipPos = float4(screenPos * 2.0 - 1.0, depth, 1.0);
-    clipPos.y = -clipPos.y; // Y座標反転
-    
-    // 簡易的なワールド座標復元（実際のプロジェクトでは正確な逆変換を実装）
-    return clipPos.xyz * 10.0; // 仮の値
+    // スクリーン座標から簡易的なワールド座標を算出
+    // 簡易化のため、深度バッファからの正確な復元は行わない
+    float3 worldPos;
+    worldPos.x = (screenPos.x - 0.5f) * 20.0f;  // Xスケール調整
+    worldPos.y = (screenPos.y - 0.5f) * 20.0f;  // Yスケール調整
+    worldPos.z = depth * 10.0f;                 // Zは深度から推定
+    return worldPos;
 }
 
 float4 main(PSInput input) : SV_Target
@@ -99,54 +99,35 @@ float4 main(PSInput input) : SV_Target
     
     // 深度値チェック（背景ピクセルはスキップ）
     if (depth >= 1.0) {
-        return float4(0.0, 0.0, 0.0, 1.0);
+        return float4(albedo * 0.1, 1.0); // 背景にも若干の色を付ける
     }
     
-    // ワールド座標を復元
+    // 簡易的なワールド座標とビュー方向
     float3 worldPos = ReconstructWorldPosition(input.texcoord, depth);
     float3 viewDir = normalize(cameraPosition - worldPos);
     
-    // 環境光
+    // 簡易ライティング計算（デバッグ用）
     float3 finalColor = albedo * ambientColor;
     
-    // 各ライトからの寄与を計算
-    for (uint i = 0; i < lightCount; ++i)
-    {
-        LightData light = lights[i];
-        float3 lightDir;
-        float attenuation = 1.0;
-        
-        if (light.type == 0) // 方向ライト
-        {
-            lightDir = normalize(-light.direction);
-            attenuation = 1.0;
-        }
-        else if (light.type == 1) // ポイントライト
-        {
-            float3 lightVec = light.position - worldPos;
-            float distance = length(lightVec);
-            lightDir = lightVec / distance;
+    // メイン方向ライトのみ使用
+    if (lightCount > 0) {
+        LightData light = lights[0];
+        if (light.type == 0) { // 方向ライト
+            float3 lightDir = normalize(-light.direction);
+            float NdotL = max(0.0, dot(worldNormal, lightDir));
             
-            // 距離減衰
-            attenuation = 1.0 / (1.0 + distance * distance / (light.range * light.range));
-            attenuation = max(0.0, attenuation);
+            // シンプルなディフューズライティング
+            float3 diffuse = albedo * light.color * light.intensity * NdotL;
+            finalColor += diffuse;
         }
-        else
-        {
-            continue; // 未対応のライトタイプ
-        }
-        
-        // PBRライティング計算
-        float3 lightContribution = CalculatePBR(
-            albedo, worldNormal, metallic, roughness,
-            viewDir, lightDir, light.color, attenuation
-        );
-        
-        finalColor += lightContribution * light.intensity;
     }
     
-    // 露出調整
-    finalColor *= exposure;
+    // 簡易露出調整
+    finalColor = finalColor * exposure;
+    
+    // デバッグ: G-Bufferデータを直接表示するオプション
+    // return float4(albedo, 1.0);           // アルベドのみ表示
+    // return float4(worldNormal, 1.0);      // 法線のみ表示
     
     return float4(finalColor, 1.0);
 }

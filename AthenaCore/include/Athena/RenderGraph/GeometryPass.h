@@ -34,7 +34,15 @@ namespace Athena {
         };
 
         /**
-         * @brief 定数バッファ構造体（256バイトアライメント）- Bindless対応
+         * @brief G-Bufferモード列挙
+         */
+        enum class RenderMode {
+            Forward,    // フォワードレンダリング（現在のモード）
+            Deferred    // ディファードレンダリング（G-Buffer生成）
+        };
+
+        /**
+         * @brief 定数バッファ構造体（256バイトアライメント）
          */
         struct GeometryConstants {
             Matrix4x4 mvpMatrix;        // Model-View-Projection行列
@@ -108,9 +116,48 @@ namespace Athena {
         void SetTextureIndex(uint32_t index) { constants.textureIndex = index; }
 
         /**
-         * @brief オブジェクトIDを設定（Multiple描画用）
+         * @brief オブジェクトIDを設定
          */
         void SetObjectID(uint32_t id) { constants.objectID = id; }
+
+        /**
+         * @brief レンダリングモードを設定
+         */
+        void SetRenderMode(RenderMode mode) { renderMode = mode; }
+
+        /**
+         * @brief G-Bufferテクスチャを設定（ディファードモード用）
+         */
+        void SetGBufferTargets(std::shared_ptr<Texture> albedo,
+                              std::shared_ptr<Texture> normal,
+                              std::shared_ptr<Texture> material) {
+            gbufferAlbedo = albedo;
+            gbufferNormal = normal;
+            gbufferMaterial = material;
+        }
+
+        /**
+         * @brief G-Buffer深度バッファを設定
+         */
+        void SetGBufferDepth(std::shared_ptr<Texture> depth) {
+            gbufferDepth = depth;
+        }
+
+        /**
+         * @brief G-Buffer RTVハンドルを設定
+         */
+        void SetGBufferRTVHandles(const D3D12_CPU_DESCRIPTOR_HANDLE handles[3]) {
+            for (int i = 0; i < 3; ++i) {
+                gbufferRTVHandles[i] = handles[i];
+            }
+        }
+
+        /**
+         * @brief G-Buffer DSVハンドルを設定
+         */
+        void SetGBufferDSVHandle(D3D12_CPU_DESCRIPTOR_HANDLE handle) {
+            gbufferDSVHandle = handle;
+        }
 
         /**
          * @brief Bindlessデスクリプタヒープを初期化
@@ -134,6 +181,16 @@ namespace Athena {
 
         // テクスチャ
         std::shared_ptr<Texture> mainTexture;
+
+        // G-Bufferテクスチャ（ディファードモード用）
+        std::shared_ptr<Texture> gbufferAlbedo;   // アルベド + メタリック
+        std::shared_ptr<Texture> gbufferNormal;   // 法線 + ラフネス
+        std::shared_ptr<Texture> gbufferMaterial; // マテリアルパラメータ
+        std::shared_ptr<Texture> gbufferDepth;    // 深度バッファ
+
+        // G-Bufferデスクリプタハンドル
+        D3D12_CPU_DESCRIPTOR_HANDLE gbufferRTVHandles[3] = {};
+        D3D12_CPU_DESCRIPTOR_HANDLE gbufferDSVHandle = {};
 
         // Bindlessレンダリング用
         std::unique_ptr<DescriptorHeap> bindlessHeap;
@@ -161,11 +218,14 @@ namespace Athena {
         Vector3 cameraPosition;
         Vector3 lightDirection;
         Vector3 lightColor;
+        RenderMode renderMode = RenderMode::Forward;
 
         /**
-         * @brief パイプライン状態を作成
+         * @brief パイプライン状態を作成（モード別）
          */
         void CreatePipelineState(ID3D12Device* device);
+        void CreateForwardPipelineState(ID3D12Device* device);
+        void CreateDeferredPipelineState(ID3D12Device* device);
 
         /**
          * @brief ルートシグネチャを作成

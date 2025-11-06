@@ -56,6 +56,23 @@ namespace Athena {
             commandList->SetGraphicsRootDescriptorTable(1, srvHandle);
         }
 
+        // フルスクリーン用のビューポートとシザー矩形を設定
+        D3D12_VIEWPORT viewport = {};
+        viewport.TopLeftX = 0.0f;
+        viewport.TopLeftY = 0.0f;
+        viewport.Width = 1280.0f;   // TODO: 動的に設定する
+        viewport.Height = 720.0f;   // TODO: 動的に設定する
+        viewport.MinDepth = 0.0f;
+        viewport.MaxDepth = 1.0f;
+        commandList->RSSetViewports(1, &viewport);
+
+        D3D12_RECT scissorRect = {};
+        scissorRect.left = 0;
+        scissorRect.top = 0;
+        scissorRect.right = 1280;   // TODO: 動的に設定する
+        scissorRect.bottom = 720;   // TODO: 動的に設定する
+        commandList->RSSetScissorRects(1, &scissorRect);
+
         // フルスクリーンクアッドの描画
         // 頂点バッファなしで三角形3つを描画してフルスクリーンをカバー
         commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

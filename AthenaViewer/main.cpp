@@ -4,6 +4,7 @@
 #include <exception>
 #include <stdexcept>
 #include <memory>
+#include <chrono>
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <d3dcompiler.h>
@@ -17,6 +18,7 @@
 #include "Athena/Resources/Texture.h"
 #include "Athena/Resources/UploadContext.h"
 #include "Athena/Utils/Math.h"
+#include "Athena/Scene/Camera.h"
 
 // RenderGraphテスト関数の宣言
 bool RunAllRenderGraphTests(std::shared_ptr<Athena::Device> device);
@@ -26,12 +28,14 @@ bool InitializeRenderGraphExample(std::shared_ptr<Athena::Device> device, uint32
 void RenderWithRenderGraph(ID3D12GraphicsCommandList* commandList, 
                           ID3D12DescriptorHeap* srvHeap,
                           D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle,
-                          D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle);
+                          D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle,
+                          bool useDeferredRendering = false);
 void SetRenderGraphSceneData(const Athena::Matrix4x4& world, const Athena::Matrix4x4& view, const Athena::Matrix4x4& proj,
                            const Athena::Vector3& cameraPos, const Athena::Vector3& lightDir, const Athena::Vector3& lightColor);
 void SetRenderGraphVertexData(const void* vertices, uint32_t vertexCount, const uint32_t* indices, uint32_t indexCount);
 void SetRenderGraphTexture(std::shared_ptr<Athena::Texture> texture);
 void SetRenderGraphObjectID(uint32_t objectID);
+void SetRenderGraphMode(bool useDeferred);
 
 using namespace Athena;
 using Microsoft::WRL::ComPtr;
@@ -48,6 +52,18 @@ enum class DisplayMode {
     COUNT
 };
 DisplayMode g_currentMode = DisplayMode::Cube;
+
+// G-Bufferモードとカメラ管理
+enum class RenderingMode {
+    Forward = 0,  // フォワードレンダリング
+    Deferred = 1  // ディファードレンダリング（G-Buffer）
+};
+RenderingMode g_renderingMode = RenderingMode::Forward;
+
+// カメラ管理
+std::unique_ptr<FPSCamera> g_camera;
+bool g_mouseCaptured = false;
+POINT g_lastMousePos = {};
 
 // 頂点構造体（アライメント明示）
 struct Vertex {
@@ -68,13 +84,69 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         if (wParam == VK_ESCAPE) {
             PostQuitMessage(0);
         } else if (wParam == VK_SPACE) {
-            // スペースキーで表示モード切り替え
+            // スペースキーで表示モード切り替え + カメラリセット
             int currentMode = static_cast<int>(g_currentMode);
             currentMode = (currentMode + 1) % static_cast<int>(DisplayMode::COUNT);
             g_currentMode = static_cast<DisplayMode>(currentMode);
             
             const char* modeNames[] = { "Cube", "Sphere" };
             Logger::Info("Display mode changed to: %s", modeNames[currentMode]);
+            
+            // カメラをデフォルト位置にリセット
+            if (g_camera) {
+                g_camera->ResetToDefaultPosition();
+            }
+        } else if (wParam == 'G' || wParam == 'g') {
+            g_renderingMode = (g_renderingMode == RenderingMode::Forward) ? 
+                            RenderingMode::Deferred : RenderingMode::Forward;
+            const char* modeNames[] = { "Forward", "Deferred (G-Buffer)" };
+            Logger::Info("Rendering mode changed to: %s", modeNames[static_cast<int>(g_renderingMode)]);
+        } else if (wParam == 'C' || wParam == 'c') {
+            // Cキーでマウスキャプチャ切り替え
+            g_mouseCaptured = !g_mouseCaptured;
+            if (g_mouseCaptured) {
+                SetCapture(hwnd);
+                ShowCursor(FALSE);
+                GetCursorPos(&g_lastMousePos);
+                Logger::Info("Mouse captured for camera control");
+            } else {
+                ReleaseCapture();
+                ShowCursor(TRUE);
+                Logger::Info("Mouse released");
+            }
+        }
+        
+        // カメラ入力をカメラに渡す
+        if (g_camera) {
+            g_camera->OnKeyPress(static_cast<int>(wParam), true);
+        }
+        return 0;
+    case WM_KEYUP:
+        // キーリリースをカメラに渡す
+        if (g_camera) {
+            g_camera->OnKeyPress(static_cast<int>(wParam), false);
+        }
+        return 0;
+    case WM_MOUSEMOVE:
+        if (g_mouseCaptured && g_camera) {
+            POINT currentPos;
+            GetCursorPos(&currentPos);
+            
+            float deltaX = static_cast<float>(currentPos.x - g_lastMousePos.x);
+            float deltaY = static_cast<float>(currentPos.y - g_lastMousePos.y);
+            
+            g_camera->OnMouseMove(deltaX, deltaY);
+            
+            // マウスを元の位置に戻す
+            SetCursorPos(g_lastMousePos.x, g_lastMousePos.y);
+        }
+        return 0;
+    case WM_MOUSEWHEEL:
+        if (g_camera) {
+            // マウスホイールのスクロール量を取得
+            int wheelDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+            float delta = static_cast<float>(wheelDelta) / WHEEL_DELTA;
+            g_camera->OnMouseScroll(delta);
         }
         return 0;
     case WM_DESTROY:
@@ -101,7 +173,7 @@ bool CreateAppWindow(HINSTANCE hInstance) {
 
     g_hwnd = CreateWindow(
         wc.lpszClassName,
-        L"Athena Renderer - RenderGraph Integration",
+        L"Athena Renderer - Deferred + Camera",
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT,
         rect.right - rect.left,
@@ -193,7 +265,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     try {
         Logger::Initialize();
         Logger::Info("==========================================================");
-        Logger::Info("  Athena Renderer - RenderGraph Integration");
+        Logger::Info("  Athena Renderer - RenderGraph + Camera Integration");
+        Logger::Info("==========================================================");
+        Logger::Info("Controls:");
+        Logger::Info("  WASD: Move camera");
+        Logger::Info("  Mouse: Look around (press C to capture/release mouse)");
+        Logger::Info("  Space: Change display mode (Cube/Sphere)");
+        Logger::Info("  G: Toggle rendering mode (Forward/Deferred)");
+        Logger::Info("  Shift: Sprint");
+        Logger::Info("  Escape: Exit");
         Logger::Info("==========================================================");
 
         // ウィンドウ作成
@@ -206,6 +286,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
         auto devicePtr = std::make_shared<Device>();
         devicePtr->Initialize(true);
         Logger::Info("✓ Device initialized");
+
+        // カメラ初期化
+        g_camera = std::make_unique<FPSCamera>();
+        g_camera->SetPerspective(3.14159f / 4.0f, static_cast<float>(WINDOW_WIDTH) / WINDOW_HEIGHT, 0.1f, 1000.0f);
+        g_camera->SetPosition(Vector3(-3.0f, 0.0f, 0.0f));
+        Logger::Info("✓ FPS Camera initialized");
 
         // RenderGraphテスト実行
         Logger::Info("=== RenderGraph基盤テスト開始 ===");
@@ -229,9 +315,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
         };
         
         TestVertex triangleVertices[] = {
-            { Athena::Vector3(0.0f, 0.8f, 0.0f), Athena::Vector3(0.0f, 0.0f, 1.0f), 0.5f, 0.0f },
-            { Athena::Vector3(-0.8f, -0.8f, 0.0f), Athena::Vector3(0.0f, 0.0f, 1.0f), 0.0f, 1.0f },
-            { Athena::Vector3(0.8f, -0.8f, 0.0f), Athena::Vector3(0.0f, 0.0f, 1.0f), 1.0f, 1.0f }
+            { Athena::Vector3(0.0f, 1.5f, 0.0f), Athena::Vector3(0.0f, 0.0f, 1.0f), 0.5f, 0.0f },
+            { Athena::Vector3(-1.5f, -1.5f, 0.0f), Athena::Vector3(0.0f, 0.0f, 1.0f), 0.0f, 1.0f },
+            { Athena::Vector3(1.5f, -1.5f, 0.0f), Athena::Vector3(0.0f, 0.0f, 1.0f), 1.0f, 1.0f }
         };
         
         uint32_t triangleIndices[] = { 0, 1, 2 };
@@ -647,7 +733,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
         MSG msg = {};
         float rotation = 0.0f;
         bool firstFrame = true;
-
+        auto lastTime = std::chrono::high_resolution_clock::now();
 
         while (msg.message != WM_QUIT) {
             if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
@@ -656,21 +742,25 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
                 continue;
             }
 
-            // MVP行列計算
-            rotation += 0.01f;
+            // 時間計算
+            auto currentTime = std::chrono::high_resolution_clock::now();
+            float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
+            lastTime = currentTime;
 
+            // カメラ更新
+            if (g_camera) {
+                g_camera->Update(deltaTime);
+            }
+
+            // MVP行列計算（カメラ統合）
+            rotation += 0.01f;
             Matrix4x4 world = Matrix4x4::RotationY(rotation) * Matrix4x4::RotationX(rotation * 0.5f);
-            Matrix4x4 view = Matrix4x4::LookAt(
-                Vector3(0.0f, 1.0f, -3.0f),
-                Vector3(0.0f, 0.0f, 0.0f),
-                Vector3(0.0f, 1.0f, 0.0f)
-            );
-            Matrix4x4 proj = Matrix4x4::Perspective(
-                3.14159f / 4.0f,
-                static_cast<float>(WINDOW_WIDTH) / WINDOW_HEIGHT,
-                0.1f,
-                100.0f
-            );
+            
+            // カメラ行列を使用
+            Matrix4x4 view = g_camera ? g_camera->GetViewMatrix() : 
+                Matrix4x4::LookAt(Vector3(-3.0f, 0.0f, 0.0f), Vector3(0.0f, 0.0f, 0.0f), Vector3(0.0f, 1.0f, 0.0f));
+            Matrix4x4 proj = g_camera ? g_camera->GetProjectionMatrix() : 
+                Matrix4x4::Perspective(3.14159f / 4.0f, static_cast<float>(WINDOW_WIDTH) / WINDOW_HEIGHT, 0.1f, 100.0f);
 
             Matrix4x4 mvp = world * view * proj;
             mvp = mvp.Transpose();
@@ -679,9 +769,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
             cbData.mvp = mvp;
             constantBuffer.Upload(&cbData, sizeof(TransformBuffer));
 
-            // RenderGraphにシーンデータを設定
+            // RenderGraphにシーンデータを設定（カメラ統合）
             if (renderGraphExampleResult) {
-                Vector3 cameraPos(0.0f, 1.0f, -3.0f);
+                Vector3 cameraPos = g_camera ? g_camera->GetPosition() : Vector3(-3.0f, 0.0f, 0.0f);
                 Vector3 lightDir(0.0f, -1.0f, 0.0f);
                 Vector3 lightColor(1.0f, 1.0f, 1.0f);
                 SetRenderGraphSceneData(world, view, proj, cameraPos, lightDir, lightColor);
@@ -757,9 +847,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
                 Athena::Vector3 lightColor(1.0f, 1.0f, 1.0f);
                 
                 SetRenderGraphSceneData(rgWorld, view, proj, cameraPos, lightDir, lightColor);
-                SetRenderGraphObjectID(0); // 単一オブジェクト
+                SetRenderGraphObjectID(0);
                 
-                RenderWithRenderGraph(commandList.Get(), cbvSrvHeap.GetD3D12DescriptorHeap(), rtvHandle, dsvHandle.cpu);
+                // レンダリングモードを適用
+                bool useDeferred = (g_renderingMode == RenderingMode::Deferred);
+                RenderWithRenderGraph(commandList.Get(), cbvSrvHeap.GetD3D12DescriptorHeap(), rtvHandle, dsvHandle.cpu, useDeferred);
                 
                 // RenderGraph実行後、メインレンダリング用の状態を再設定
                 commandList->SetGraphicsRootSignature(rootSignature.Get());
