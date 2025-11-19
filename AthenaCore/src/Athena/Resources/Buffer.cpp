@@ -1,6 +1,8 @@
 #include "Athena/Resources/Buffer.h"
+#include "Athena/Resources/UploadContext.h"
 #include "Athena/Utils/Logger.h"
 #include <stdexcept>
+#include <vector>
 
 namespace Athena {
 
@@ -41,25 +43,93 @@ namespace Athena {
             throw std::out_of_range("Upload size exceeds buffer size");
         }
 
-        // UPLOAD ƒq[ƒv‚Ìê‡‚Í’¼Ú‘‚«‚İ
+        // UPLOAD ï¿½qï¿½[ï¿½vï¿½Ìê‡ï¿½Í’ï¿½ï¿½Úï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         if (heapType == D3D12_HEAP_TYPE_UPLOAD) {
             void* mapped = Map();
             memcpy(static_cast<uint8_t*>(mapped) + offset, data, dataSize);
             Unmap();
         }
         else {
-            // DEFAULT ƒq[ƒv‚Ìê‡‚Íˆê“I‚ÈƒAƒbƒvƒ[ƒhƒoƒbƒtƒ@Œo—R
-            // TODO: UploadContext ‚ğg‚Á‚½À‘•iŒã‚ÌƒtƒF[ƒY‚Åj
-            throw std::runtime_error("Upload to DEFAULT heap not yet implemented");
+            // DEFAULTãƒ’ãƒ¼ãƒ—ã®å ´åˆã¯UploadWithDeviceãƒ¡ã‚½ãƒƒãƒ‰ã‚’ä½¿ç”¨ã™ã‚‹å¿…è¦ãŒã‚ã‚‹
+            throw std::runtime_error("Upload to DEFAULT heap requires device and command queue. Use UploadWithDevice() method instead.");
+        }
+    }
+
+    void Buffer::UploadWithDevice(const void* data, uint64_t dataSize, 
+                                ID3D12Device* device, ID3D12CommandQueue* commandQueue,
+                                uint64_t offset) {
+        if (!data) {
+            throw std::invalid_argument("Upload data is null");
+        }
+
+        if (!device || !commandQueue) {
+            throw std::invalid_argument("Device or command queue is null");
+        }
+
+        if (offset + dataSize > size) {
+            throw std::out_of_range("Upload size exceeds buffer size");
+        }
+
+        // UPLOADãƒ’ãƒ¼ãƒ—ã®å ´åˆã¯é€šå¸¸ã®Uploadãƒ¡ã‚½ãƒƒãƒ‰ã‚’ä½¿ç”¨
+        if (heapType == D3D12_HEAP_TYPE_UPLOAD) {
+            void* mapped = Map();
+            memcpy(static_cast<uint8_t*>(mapped) + offset, data, dataSize);
+            Unmap();
+            return;
+        }
+
+        // DEFAULTãƒ’ãƒ¼ãƒ—ã®å ´åˆã¯UploadContextã‚’ä½¿ç”¨
+        if (heapType == D3D12_HEAP_TYPE_DEFAULT) {
+            UploadContext uploadContext;
+            uploadContext.Initialize(device, commandQueue);
+
+            uploadContext.Begin();
+
+            // ãƒªã‚½ãƒ¼ã‚¹ãƒãƒªã‚¢: COMMON -> COPY_DEST
+            uploadContext.TransitionResource(
+                resource.Get(),
+                D3D12_RESOURCE_STATE_COMMON,
+                D3D12_RESOURCE_STATE_COPY_DEST
+            );
+
+            // ãƒ‡ãƒ¼ã‚¿ã‚’ã‚¢ãƒƒãƒ—ãƒ­ãƒ¼ãƒ‰
+            if (offset == 0 && dataSize == size) {
+                // å…¨ä½“ã®ã‚¢ãƒƒãƒ—ãƒ­ãƒ¼ãƒ‰
+                uploadContext.UploadBuffer(resource.Get(), data, dataSize);
+            } else {
+                // éƒ¨åˆ†çš„ãªã‚¢ãƒƒãƒ—ãƒ­ãƒ¼ãƒ‰ï¼ˆç°¡æ˜“å®Ÿè£…ï¼‰
+                // ä¸€æ™‚çš„ãªå…¨ä½“ãƒãƒƒãƒ•ã‚¡ã‚’ä½œæˆã—ã¦ã‚³ãƒ”ãƒ¼
+                std::vector<uint8_t> tempBuffer(size);
+                
+                // æ—¢å­˜ãƒ‡ãƒ¼ã‚¿ã®èª­ã¿å–ã‚Šã¯å›°é›£ãªã®ã§ã€ã“ã“ã§ã¯è­¦å‘Šã‚’å‡ºåŠ›
+                Logger::Warning("Partial upload to DEFAULT heap may overwrite existing data");
+                
+                memcpy(tempBuffer.data() + offset, data, dataSize);
+                uploadContext.UploadBuffer(resource.Get(), tempBuffer.data(), size);
+            }
+
+            // ãƒªã‚½ãƒ¼ã‚¹ãƒãƒªã‚¢: COPY_DEST -> COMMON
+            uploadContext.TransitionResource(
+                resource.Get(),
+                D3D12_RESOURCE_STATE_COPY_DEST,
+                D3D12_RESOURCE_STATE_COMMON
+            );
+
+            uploadContext.End();
+            uploadContext.Shutdown();
+
+            Logger::Info("Buffer data uploaded to DEFAULT heap (size: %llu bytes, offset: %llu)", dataSize, offset);
+        } else {
+            throw std::runtime_error("Unsupported heap type for upload");
         }
     }
 
     void* Buffer::Map() {
         if (mappedData) {
-            return mappedData; // Šù‚Éƒ}ƒbƒvÏ‚İ
+            return mappedData; // ï¿½ï¿½ï¿½Éƒ}ï¿½bï¿½vï¿½Ï‚ï¿½
         }
 
-        D3D12_RANGE readRange = { 0, 0 }; // CPU‚©‚ç“Ç‚Ü‚È‚¢
+        D3D12_RANGE readRange = { 0, 0 }; // CPUï¿½ï¿½ï¿½ï¿½Ç‚Ü‚È‚ï¿½
         HRESULT hr = resource->Map(0, &readRange, &mappedData);
 
         if (FAILED(hr)) {
@@ -84,7 +154,7 @@ namespace Athena {
         D3D12_VERTEX_BUFFER_VIEW vbv = {};
         vbv.BufferLocation = GetGPUVirtualAddress();
         vbv.SizeInBytes = static_cast<UINT>(size);
-        vbv.StrideInBytes = 0; // ŒÄ‚Ño‚µ‘¤‚Åİ’è‚·‚é•K—v‚ ‚è
+        vbv.StrideInBytes = 0; // ï¿½Ä‚Ñoï¿½ï¿½ï¿½ï¿½ï¿½Åİ’è‚·ï¿½ï¿½Kï¿½vï¿½ï¿½ï¿½ï¿½
         return vbv;
     }
 
@@ -92,7 +162,7 @@ namespace Athena {
         D3D12_INDEX_BUFFER_VIEW ibv = {};
         ibv.BufferLocation = GetGPUVirtualAddress();
         ibv.SizeInBytes = static_cast<UINT>(size);
-        ibv.Format = DXGI_FORMAT_R32_UINT; // 32bit ƒCƒ“ƒfƒbƒNƒX
+        ibv.Format = DXGI_FORMAT_R32_UINT; // 32bit ï¿½Cï¿½ï¿½ï¿½fï¿½bï¿½Nï¿½X
         return ibv;
     }
 
@@ -104,7 +174,7 @@ namespace Athena {
     }
 
     void Buffer::CreateResource(ID3D12Device* device) {
-        // ƒoƒbƒtƒ@ƒŠƒ\[ƒX‚Ìİ’è
+        // ï¿½oï¿½bï¿½tï¿½@ï¿½ï¿½ï¿½\ï¿½[ï¿½Xï¿½Ìİ’ï¿½
         D3D12_RESOURCE_DESC resourceDesc = {};
         resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
         resourceDesc.Alignment = 0;
@@ -118,7 +188,7 @@ namespace Athena {
         resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
         resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-        // ƒq[ƒvƒvƒƒpƒeƒB
+        // ï¿½qï¿½[ï¿½vï¿½vï¿½ï¿½ï¿½pï¿½eï¿½B
         D3D12_HEAP_PROPERTIES heapProps = {};
         heapProps.Type = heapType;
         heapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
@@ -126,10 +196,10 @@ namespace Athena {
         heapProps.CreationNodeMask = 1;
         heapProps.VisibleNodeMask = 1;
 
-        // ƒŠƒ\[ƒXó‘Ô
+        // ï¿½ï¿½ï¿½\ï¿½[ï¿½Xï¿½ï¿½ï¿½
         D3D12_RESOURCE_STATES initialState = D3D12_RESOURCE_STATE_GENERIC_READ;
 
-        // ƒŠƒ\[ƒXì¬
+        // ï¿½ï¿½ï¿½\ï¿½[ï¿½Xï¿½ì¬
         HRESULT hr = device->CreateCommittedResource(
             &heapProps,
             D3D12_HEAP_FLAG_NONE,

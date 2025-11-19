@@ -118,6 +118,8 @@ namespace Athena {
         constants.exposure = exposure;
         constants.ambientColor = ambientColor;
         constants.lightCount = lightCount;
+        constants.invViewMatrix = invViewMatrix.ToHLSL();  // HLSL用に転置
+        constants.invProjMatrix = invProjMatrix.ToHLSL();  // HLSL用に転置
 
         // ライトデータをコピー
         for (uint32_t i = 0; i < lightCount && i < 8; ++i) {

@@ -41,9 +41,11 @@ namespace Athena {
             float exposure;             // 露出値
             Vector3 ambientColor;       // 環境光色
             uint32_t lightCount;        // ライト数
+            Matrix4x4 invViewMatrix;    // 逆ビュー行列（ワールド座標復元用）
+            Matrix4x4 invProjMatrix;    // 逆プロジェクション行列（ワールド座標復元用）
             LightData lights[8];        // 最大8個のライト
-            // 256バイトアライメント用パディング
-            float paddingArray[32];
+            // 256バイトアライメント用パディング（行列追加で調整）
+            float paddingArray[8];
         };
 
         LightingPass() : RenderPass("LightingPass") {
@@ -79,6 +81,14 @@ namespace Athena {
         void SetCamera(const Vector3& position, float exposure = 1.0f) {
             cameraPosition = position;
             this->exposure = exposure;
+        }
+
+        /**
+         * @brief 変換行列を設定（座標復元用）
+         */
+        void SetTransform(const Matrix4x4& view, const Matrix4x4& proj) {
+            invViewMatrix = view.Inverse();
+            invProjMatrix = proj.Inverse();
         }
 
         /**
@@ -123,6 +133,8 @@ namespace Athena {
         float exposure = 1.0f;
         uint32_t lightCount = 0;
         LightData lights[8] = {};
+        Matrix4x4 invViewMatrix;
+        Matrix4x4 invProjMatrix;
 
         /**
          * @brief パイプライン状態を作成

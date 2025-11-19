@@ -25,6 +25,8 @@ cbuffer LightingConstants : register(b0)
     float     exposure;         // 露出値
     float3    ambientColor;     // 環境光色
     uint      lightCount;       // ライト数
+    float4x4  invViewMatrix;    // 逆ビュー行列
+    float4x4  invProjMatrix;    // 逆プロジェクション行列
     LightData lights[8];        // 最大8個のライト
 };
 
@@ -72,16 +74,25 @@ float3 CalculatePBR(float3 albedo, float3 normal, float metallic, float roughnes
     return (diffuse + specular) * lightColor * NdotL * attenuation;
 }
 
-// ワールド座標の復元（簡易版）
+// ワールド座標の復元（正確な実装）
 float3 ReconstructWorldPosition(float2 screenPos, float depth)
 {
-    // スクリーン座標から簡易的なワールド座標を算出
-    // 簡易化のため、深度バッファからの正確な復元は行わない
-    float3 worldPos;
-    worldPos.x = (screenPos.x - 0.5f) * 20.0f;  // Xスケール調整
-    worldPos.y = (screenPos.y - 0.5f) * 20.0f;  // Yスケール調整
-    worldPos.z = depth * 10.0f;                 // Zは深度から推定
-    return worldPos;
+    // スクリーン座標をNDC座標に変換
+    float4 ndcPos = float4(
+        screenPos.x * 2.0f - 1.0f,      // [0,1] -> [-1,1]
+        1.0f - screenPos.y * 2.0f,      // [0,1] -> [1,-1] (DirectXはY軸反転)
+        depth,                          // 深度値（0.0～1.0）
+        1.0f
+    );
+    
+    // 逆プロジェクション変換でビュー空間座標に変換
+    float4 viewPos = mul(ndcPos, invProjMatrix);
+    viewPos /= viewPos.w;  // パースペクティブ除算
+    
+    // 逆ビュー変換でワールド空間座標に変換
+    float4 worldPos = mul(viewPos, invViewMatrix);
+    
+    return worldPos.xyz;
 }
 
 float4 main(PSInput input) : SV_Target

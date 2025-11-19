@@ -9,20 +9,20 @@ namespace Athena {
     using Microsoft::WRL::ComPtr;
 
     /**
-     * @brief ƒoƒbƒtƒ@‚Ìí—Ş
+     * @brief ï¿½oï¿½bï¿½tï¿½@ï¿½Ìï¿½ï¿½
      */
     enum class BufferType {
-        Vertex,      // ’¸“_ƒoƒbƒtƒ@
-        Index,       // ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@
-        Constant,    // ’è”ƒoƒbƒtƒ@
-        Structured   // \‘¢‰»ƒoƒbƒtƒ@
+        Vertex,      // ï¿½ï¿½ï¿½_ï¿½oï¿½bï¿½tï¿½@
+        Index,       // ï¿½Cï¿½ï¿½ï¿½fï¿½bï¿½Nï¿½Xï¿½oï¿½bï¿½tï¿½@
+        Constant,    // ï¿½è”ï¿½oï¿½bï¿½tï¿½@
+        Structured   // ï¿½\ï¿½ï¿½ï¿½ï¿½ï¿½oï¿½bï¿½tï¿½@
     };
 
     /**
-     * @brief GPU ƒoƒbƒtƒ@‚Ì’ŠÛ‰»ƒNƒ‰ƒX
+     * @brief GPU ï¿½oï¿½bï¿½tï¿½@ï¿½Ì’ï¿½ï¿½Û‰ï¿½ï¿½Nï¿½ï¿½ï¿½X
      *
-     * DirectX 12‚Ì—lX‚Èƒoƒbƒtƒ@i’¸“_AƒCƒ“ƒfƒbƒNƒXA’è”‚È‚Çj‚ğ
-     * “ˆê“I‚Éˆµ‚¤‚½‚ß‚ÌŠî’êƒNƒ‰ƒX
+     * DirectX 12ï¿½Ì—lï¿½Xï¿½Èƒoï¿½bï¿½tï¿½@ï¿½iï¿½ï¿½ï¿½_ï¿½Aï¿½Cï¿½ï¿½ï¿½fï¿½bï¿½Nï¿½Xï¿½Aï¿½è”ï¿½È‚Çjï¿½ï¿½
+     * ï¿½ï¿½ï¿½ï¿½Iï¿½Éˆï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß‚ÌŠï¿½ï¿½Nï¿½ï¿½ï¿½X
      */
     class Buffer {
     public:
@@ -30,11 +30,11 @@ namespace Athena {
         ~Buffer();
 
         /**
-         * @brief ƒoƒbƒtƒ@‚Ì‰Šú‰»
-         * @param device DirectX 12ƒfƒoƒCƒX
-         * @param size ƒoƒbƒtƒ@ƒTƒCƒYiƒoƒCƒgj
-         * @param type ƒoƒbƒtƒ@‚Ìí—Ş
-         * @param heapType ƒq[ƒvƒ^ƒCƒviDEFAULT or UPLOADj
+         * @brief ï¿½oï¿½bï¿½tï¿½@ï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½
+         * @param device DirectX 12ï¿½fï¿½oï¿½Cï¿½X
+         * @param size ï¿½oï¿½bï¿½tï¿½@ï¿½Tï¿½Cï¿½Yï¿½iï¿½oï¿½Cï¿½gï¿½j
+         * @param type ï¿½oï¿½bï¿½tï¿½@ï¿½Ìï¿½ï¿½
+         * @param heapType ï¿½qï¿½[ï¿½vï¿½^ï¿½Cï¿½vï¿½iDEFAULT or UPLOADï¿½j
          */
         void Initialize(
             ID3D12Device* device,
@@ -44,36 +44,44 @@ namespace Athena {
         );
 
         /**
-         * @brief ƒoƒbƒtƒ@‚ÌI—¹ˆ—
+         * @brief ï¿½oï¿½bï¿½tï¿½@ï¿½ÌIï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
          */
         void Shutdown();
 
         /**
-         * @brief ƒf[ƒ^‚ğƒoƒbƒtƒ@‚ÉƒAƒbƒvƒ[ƒh
-         * @param data ƒAƒbƒvƒ[ƒh‚·‚éƒf[ƒ^
-         * @param size ƒf[ƒ^ƒTƒCƒYiƒoƒCƒgj
-         * @param offset ƒoƒbƒtƒ@“à‚ÌƒIƒtƒZƒbƒg
+         * @brief ï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½oï¿½bï¿½tï¿½@ï¿½ÉƒAï¿½bï¿½vï¿½ï¿½ï¿½[ï¿½h
+         * @param data ï¿½Aï¿½bï¿½vï¿½ï¿½ï¿½[ï¿½hï¿½ï¿½ï¿½ï¿½fï¿½[ï¿½^
+         * @param size ï¿½fï¿½[ï¿½^ï¿½Tï¿½Cï¿½Yï¿½iï¿½oï¿½Cï¿½gï¿½j
+         * @param offset ï¿½oï¿½bï¿½tï¿½@ï¿½ï¿½ï¿½ÌƒIï¿½tï¿½Zï¿½bï¿½g
          */
         void Upload(const void* data, uint64_t size, uint64_t offset = 0);
 
         /**
-         * @brief ƒoƒbƒtƒ@‚ğƒ}ƒbƒviCPUƒAƒNƒZƒX‰Â”\‚É‚·‚éj
-         * @return ƒ}ƒbƒv‚³‚ê‚½ƒƒ‚ƒŠ‚Ö‚Ìƒ|ƒCƒ“ƒ^
+         * @brief DEFAULTãƒ’ãƒ¼ãƒ—ç”¨ã®ã‚¢ãƒƒãƒ—ãƒ­ãƒ¼ãƒ‰ï¼ˆãƒ‡ãƒã‚¤ã‚¹ã¨ã‚³ãƒãƒ³ãƒ‰ã‚­ãƒ¥ãƒ¼æŒ‡å®šï¼‰
+         */
+        void UploadWithDevice(const void* data, uint64_t size, 
+                            ID3D12Device* device, ID3D12CommandQueue* commandQueue,
+                            uint64_t offset = 0);
+
+        /**
+         * @brief ï¿½oï¿½bï¿½tï¿½@ï¿½ï¿½ï¿½}ï¿½bï¿½vï¿½iCPUï¿½Aï¿½Nï¿½Zï¿½Xï¿½Â”\ï¿½É‚ï¿½ï¿½ï¿½j
+         * @return ï¿½}ï¿½bï¿½vï¿½ï¿½ï¿½ê‚½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö‚Ìƒ|ï¿½Cï¿½ï¿½ï¿½^
          */
         void* Map();
 
         /**
-         * @brief ƒoƒbƒtƒ@‚ğƒAƒ“ƒ}ƒbƒv
+         * @brief ï¿½oï¿½bï¿½tï¿½@ï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½}ï¿½bï¿½v
          */
         void Unmap();
 
-        // ƒAƒNƒZƒT
+        // ï¿½Aï¿½Nï¿½Zï¿½T
         ID3D12Resource* GetResource() const { return resource.Get(); }
+        ID3D12Resource* GetD3D12Resource() const { return resource.Get(); }  // RenderGraphãƒãƒªã‚¢ç”¨
         D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress() const;
         uint64_t GetSize() const { return size; }
         BufferType GetType() const { return type; }
 
-        // ƒrƒ…[æ“¾
+        // ï¿½rï¿½ï¿½ï¿½[ï¿½æ“¾
         D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView() const;
         D3D12_INDEX_BUFFER_VIEW GetIndexBufferView() const;
         D3D12_CONSTANT_BUFFER_VIEW_DESC GetConstantBufferViewDesc() const;

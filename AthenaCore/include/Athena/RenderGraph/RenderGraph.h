@@ -16,6 +16,16 @@ namespace Athena {
     class Buffer;
 
     /**
+     * @brief リソース状態遷移情報
+     */
+    struct ResourceStateTransition {
+        uint32_t resourceId;
+        D3D12_RESOURCE_STATES fromState;
+        D3D12_RESOURCE_STATES toState;
+        uint32_t passIndex;
+    };
+
+    /**
      * @brief リソースの実体情報
      */
     struct ResourceInfo {
@@ -27,6 +37,7 @@ namespace Athena {
         bool isTransient = true;               // 一時的なリソースかどうか
         uint32_t firstPass = 0xFFFFFFFF;       // 最初に使用されるパス番号
         uint32_t lastPass = 0xFFFFFFFF;        // 最後に使用されるパス番号
+        D3D12_RESOURCE_STATES currentState = D3D12_RESOURCE_STATE_COMMON;  // 現在の状態
         
         /**
          * @brief 実際のリソースを取得
@@ -54,6 +65,8 @@ namespace Athena {
         uint32_t passIndex;
         std::vector<ResourceHandle> inputs;    // 入力リソース
         std::vector<ResourceHandle> outputs;   // 出力リソース
+        std::vector<ResourceStateTransition> preBarriers;   // パス実行前のバリア
+        std::vector<ResourceStateTransition> postBarriers;  // パス実行後のバリア
         PassSetupData setupData;
         bool enabled = true;
     };
@@ -219,14 +232,52 @@ namespace Athena {
         bool AnalyzeDependencies();
 
         /**
+         * @brief トポロジカルソート（カーンのアルゴリズム）
+         */
+        bool TopologicalSort(const std::vector<uint32_t>& enabledPasses);
+
+        /**
+         * @brief 依存関係グラフを構築
+         */
+        void BuildDependencyGraph(const std::vector<uint32_t>& enabledPasses,
+                                 std::unordered_map<uint32_t, uint32_t>& inDegree,
+                                 std::unordered_map<uint32_t, std::vector<uint32_t>>& adjacencyList);
+
+        /**
          * @brief 未使用パスを除去
          */
         void CullUnusedPasses();
 
         /**
-         * @brief リソースライフタイムを計算
+         * @brief リソースライフタイムを解析
          */
-        void CalculateResourceLifetimes();
+        void AnalyzeResourceLifetime();
+
+        /**
+         * @brief リソース配置を最適化
+         */
+        void OptimizeResourceAllocation();
+
+        /**
+         * @brief リソースバリアを解析・挿入
+         */
+        void AnalyzeResourceBarriers();
+
+        /**
+         * @brief リソースの互換性をチェック
+         */
+        bool ResourcesCompatible(const ResourceDesc& a, const ResourceDesc& b) const;
+
+        /**
+         * @brief 使用方法からリソース状態を取得
+         */
+        D3D12_RESOURCE_STATES GetResourceStateFromUsage(ResourceUsage usage, bool isWrite) const;
+
+        /**
+         * @brief リソースバリアをコマンドリストに挿入
+         */
+        void InsertResourceBarriers(ID3D12GraphicsCommandList* commandList,
+                                   const std::vector<ResourceStateTransition>& barriers);
 
         /**
          * @brief 一時リソースを作成・配置

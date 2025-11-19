@@ -195,6 +195,11 @@ namespace Athena {
             return result;
         }
 
+        // HLSL定数バッファ用転置（一貫性のため）
+        Matrix4x4 ToHLSL() const {
+            return Transpose();
+        }
+
         // 行列式（3x3余因子）
         float Determinant3x3(int row, int col) const {
             int rows[3], cols[3];

@@ -63,12 +63,11 @@ namespace Athena {
             UpdateBuffers(device);
         }
 
-        // 定数バッファ更新
-        constants.mvpMatrix = worldMatrix * viewMatrix * projMatrix;
-        constants.mvpMatrix = constants.mvpMatrix.Transpose();
-        constants.worldMatrix = worldMatrix.Transpose();
-        constants.viewMatrix = viewMatrix.Transpose();
-        constants.projMatrix = projMatrix.Transpose();
+        // 定数バッファ更新（HLSL用に転置）
+        constants.mvpMatrix = (worldMatrix * viewMatrix * projMatrix).ToHLSL();
+        constants.worldMatrix = worldMatrix.ToHLSL();
+        constants.viewMatrix = viewMatrix.ToHLSL();
+        constants.projMatrix = projMatrix.ToHLSL();
         constants.cameraPosition = cameraPosition;
         constants.lightDirection = lightDirection;
         constants.lightColor = lightColor;

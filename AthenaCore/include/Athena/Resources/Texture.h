@@ -120,6 +120,7 @@ namespace Athena {
 
         // �A�N�Z�T
         ID3D12Resource* GetResource() const { return resource.Get(); }
+        ID3D12Resource* GetD3D12Resource() const { return resource.Get(); }  // RenderGraphバリア用
         uint32_t GetWidth() const { return width; }
         uint32_t GetHeight() const { return height; }
         DXGI_FORMAT GetFormat() const { return format; }
