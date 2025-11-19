@@ -134,6 +134,21 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="RenderGraphTest.cpp" />
     <ClCompile Include="RenderGraphExample.cpp" />
+    <ClCompile Include="ImGuiManager.cpp" />
+    <!-- ImGUI Core Files -->
+    <ClCompile Include="..\external\imgui\imgui.cpp" />
+    <ClCompile Include="..\external\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\external\imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\external\imgui\imgui_widgets.cpp" />
+    <!-- ImGUI Backend Files -->
+    <ClCompile Include="..\external\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="..\external\imgui\imgui_impl_dx12.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ImGuiManager.h" />
+    <ClInclude Include="..\external\imgui\imgui.h" />
+    <ClInclude Include="..\external\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="..\external\imgui\imgui_impl_dx12.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

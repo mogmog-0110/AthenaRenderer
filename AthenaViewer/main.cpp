@@ -19,6 +19,7 @@
 #include "Athena/Resources/UploadContext.h"
 #include "Athena/Utils/Math.h"
 #include "Athena/Scene/Camera.h"
+#include "ImGuiManager.h"
 
 // RenderGraphテスト関数の宣言
 bool RunAllRenderGraphTests(std::shared_ptr<Athena::Device> device);
@@ -65,6 +66,9 @@ std::unique_ptr<FPSCamera> g_camera;
 bool g_mouseCaptured = false;
 POINT g_lastMousePos = {};
 
+// ImGUI管理
+std::unique_ptr<Athena::ImGuiManager> g_imguiManager;
+
 // 頂点構造体（アライメント明示）
 struct Vertex {
     Vector3 position;   // 0 - 11バイト
@@ -79,42 +83,20 @@ struct TransformBuffer {
 
 // ウィンドウプロシージャ
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    // ImGUIメッセージ処理を最初に行う
+    if (g_imguiManager && g_imguiManager->ProcessWin32Message(hwnd, msg, wParam, lParam)) {
+        return true;
+    }
+    
     switch (msg) {
     case WM_KEYDOWN:
         if (wParam == VK_ESCAPE) {
             PostQuitMessage(0);
-        } else if (wParam == VK_SPACE) {
-            // スペースキーで表示モード切り替え + カメラリセット
-            int currentMode = static_cast<int>(g_currentMode);
-            currentMode = (currentMode + 1) % static_cast<int>(DisplayMode::COUNT);
-            g_currentMode = static_cast<DisplayMode>(currentMode);
-            
-            const char* modeNames[] = { "Cube", "Sphere" };
-            Logger::Info("Display mode changed to: %s", modeNames[currentMode]);
-            
-            // カメラをデフォルト位置にリセット
-            if (g_camera) {
-                g_camera->ResetToDefaultPosition();
-            }
-        } else if (wParam == 'G' || wParam == 'g') {
-            g_renderingMode = (g_renderingMode == RenderingMode::Forward) ? 
-                            RenderingMode::Deferred : RenderingMode::Forward;
-            const char* modeNames[] = { "Forward", "Deferred (G-Buffer)" };
-            Logger::Info("Rendering mode changed to: %s", modeNames[static_cast<int>(g_renderingMode)]);
-        } else if (wParam == 'C' || wParam == 'c') {
-            // Cキーでマウスキャプチャ切り替え
-            g_mouseCaptured = !g_mouseCaptured;
-            if (g_mouseCaptured) {
-                SetCapture(hwnd);
-                ShowCursor(FALSE);
-                GetCursorPos(&g_lastMousePos);
-                Logger::Info("Mouse captured for camera control");
-            } else {
-                ReleaseCapture();
-                ShowCursor(TRUE);
-                Logger::Info("Mouse released");
-            }
-        }
+        } 
+        // 以下のキーボード入力処理はImGUIに移行
+        // else if (wParam == VK_SPACE) { ... } // -> ImGUIのGeometry切り替えに移行
+        // else if (wParam == 'G' || wParam == 'g') { ... } // -> ImGUIのRendering Mode切り替えに移行
+        // else if (wParam == 'C' || wParam == 'c') { ... } // -> ImGUIのMouse Capture切り替えに移行
         
         // カメラ入力をカメラに渡す
         if (g_camera) {
@@ -364,6 +346,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
         DescriptorHeap cbvSrvHeap;
         cbvSrvHeap.Initialize(devicePtr->GetD3D12Device(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 10, true);
         Logger::Info("✓ Descriptor heaps created");
+
+        // ImGUI初期化
+        g_imguiManager = std::make_unique<Athena::ImGuiManager>();
+        if (!g_imguiManager->Initialize(
+            g_hwnd,
+            devicePtr->GetD3D12Device(),
+            commandQueue.GetD3D12CommandQueue(),
+            SwapChain::BufferCount,
+            swapChain.GetFormat(),
+            cbvSrvHeap.GetD3D12DescriptorHeap()
+        )) {
+            Logger::Error("Failed to initialize ImGUI");
+            return -1;
+        }
+        Logger::Info("✓ ImGUI initialized");
 
         // RTVを作成
         for (uint32_t i = 0; i < SwapChain::BufferCount; ++i) {
@@ -752,6 +749,38 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
                 g_camera->Update(deltaTime);
             }
 
+            // ImGUI フレーム開始
+            if (g_imguiManager) {
+                g_imguiManager->BeginFrame();
+                g_imguiManager->UpdatePerformanceStats(deltaTime);
+                
+                // UI状態の更新
+                if (g_imguiManager->IsRenderingModeChanged()) {
+                    g_renderingMode = g_imguiManager->IsDeferredRenderingEnabled() ? 
+                                    RenderingMode::Deferred : RenderingMode::Forward;
+                    const char* modeNames[] = { "Forward", "Deferred (G-Buffer)" };
+                    Logger::Info("Rendering mode changed to: %s", modeNames[static_cast<int>(g_renderingMode)]);
+                }
+                
+                if (g_imguiManager->IsGeometryModeChanged()) {
+                    int geometryMode = g_imguiManager->GetCurrentGeometryMode();
+                    g_currentMode = static_cast<DisplayMode>(geometryMode);
+                    const char* modeNames[] = { "Cube", "Sphere" };
+                    Logger::Info("Display mode changed to: %s (ImGUI value: %d, DisplayMode value: %d)", 
+                               modeNames[geometryMode], geometryMode, static_cast<int>(g_currentMode));
+                }
+                
+                if (g_imguiManager->IsCameraResetRequested()) {
+                    if (g_camera) {
+                        g_camera->SetPosition(Vector3(-3.0f, 0.0f, 0.0f));
+                        g_camera->ResetToDefaultPosition();
+                        Logger::Info("Camera reset to default position");
+                    }
+                }
+                
+                g_imguiManager->ResetChangeFlags();
+            }
+
             // MVP行列計算（カメラ統合）
             rotation += 0.01f;
             Matrix4x4 world = Matrix4x4::RotationY(rotation) * Matrix4x4::RotationX(rotation * 0.5f);
@@ -814,9 +843,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
                 // 表示モードに応じて頂点データを設定
                 static DisplayMode lastMode = DisplayMode::COUNT; // 無効な初期値
                 if (g_currentMode != lastMode) {
+                    Logger::Info("RenderGraph: Switching geometry from mode %d to mode %d", 
+                               static_cast<int>(lastMode), static_cast<int>(g_currentMode));
+                    Logger::Info("g_currentMode == DisplayMode::Cube: %s", 
+                               (g_currentMode == DisplayMode::Cube) ? "true" : "false");
+                    Logger::Info("g_currentMode == DisplayMode::Sphere: %s", 
+                               (g_currentMode == DisplayMode::Sphere) ? "true" : "false");
+                    
                     if (g_currentMode == DisplayMode::Cube) {
                         SetRenderGraphVertexData(rgCubeVertices, 24, indices, 36);
-                        Logger::Info("RenderGraph: Switched to Cube vertex data");
+                        Logger::Info("RenderGraph: Switched to Cube vertex data (DisplayMode::Cube = %d)", 
+                                   static_cast<int>(DisplayMode::Cube));
                     } else if (g_currentMode == DisplayMode::Sphere) {
                         // Sphere頂点データを変換してRenderGraphに設定
                         std::vector<TestVertex> rgSphereVertices;
@@ -835,7 +872,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
                                                static_cast<uint32_t>(rgSphereVertices.size()),
                                                sphereIndices.data(), 
                                                static_cast<uint32_t>(sphereIndices.size()));
-                        Logger::Info("RenderGraph: Switched to Sphere vertex data");
+                        Logger::Info("RenderGraph: Switched to Sphere vertex data (DisplayMode::Sphere = %d)", 
+                                   static_cast<int>(DisplayMode::Sphere));
                     }
                     lastMode = g_currentMode;
                 }
@@ -904,7 +942,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
                 Logger::Warning("RenderGraph disabled - no fallback rendering available");
             }
 
+            // ImGUI レンダリング（RENDER_TARGET状態で実行）
+            if (g_imguiManager) {
+                g_imguiManager->EndFrame(commandList.Get());
+            }
 
+            // レンダリング完了後にPRESENT状態に遷移
             barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
             barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
             commandList->ResourceBarrier(1, &barrier);
