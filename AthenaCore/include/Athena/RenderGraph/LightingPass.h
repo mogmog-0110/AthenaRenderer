@@ -113,6 +113,14 @@ namespace Athena {
          */
         void ClearLights() { lightCount = 0; }
 
+        /**
+         * @brief レンダーターゲットサイズを設定
+         */
+        void SetRenderTargetSize(uint32_t width, uint32_t height) {
+            renderTargetWidth = width;
+            renderTargetHeight = height;
+        }
+
     private:
         // パイプライン状態
         ComPtr<ID3D12RootSignature> rootSignature;
@@ -135,6 +143,10 @@ namespace Athena {
         LightData lights[8] = {};
         Matrix4x4 invViewMatrix;
         Matrix4x4 invProjMatrix;
+
+        // レンダーターゲットサイズ
+        uint32_t renderTargetWidth = 1280;
+        uint32_t renderTargetHeight = 720;
 
         /**
          * @brief パイプライン状態を作成

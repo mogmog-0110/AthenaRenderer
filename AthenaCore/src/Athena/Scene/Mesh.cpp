@@ -4,6 +4,7 @@
 #include "Athena/Utils/Logger.h"
 #include <algorithm>
 #include <limits>
+#include <cstring>
 
 namespace Athena {
 
@@ -196,6 +197,54 @@ namespace Athena {
         Logger::Info("✓ Mesh: Bounds calculated - Min(%.2f, %.2f, %.2f) Max(%.2f, %.2f, %.2f)",
             boundsMin.x, boundsMin.y, boundsMin.z,
             boundsMax.x, boundsMax.y, boundsMax.z);
+    }
+    
+    void Mesh::SetVertexData(const void* data, size_t dataSize, size_t stride) {
+        vertexStride = stride;
+        rawVertexData.resize(dataSize);
+        std::memcpy(rawVertexData.data(), data, dataSize);
+        vertexCount = static_cast<uint32_t>(dataSize / stride);
+        Logger::Info("Mesh::SetVertexData - {} vertices, {} bytes total, {} stride", vertexCount, dataSize, stride);
+    }
+    
+    void Mesh::SetIndexData(const void* data, size_t dataSize, size_t indexCount) {
+        rawIndexData.resize(dataSize);
+        std::memcpy(rawIndexData.data(), data, dataSize);
+        rawIndexCount = indexCount;
+        indexCount = static_cast<uint32_t>(indexCount);
+        Logger::Info("Mesh::SetIndexData - {} indices, {} bytes total", indexCount, dataSize);
+    }
+    
+    void Mesh::CreateBuffers(ID3D12Device* device) {
+        Logger::Info("Mesh::CreateBuffers - vertex data: {} bytes, index data: {} bytes", 
+                    rawVertexData.size(), rawIndexData.size());
+        
+        if (rawVertexData.empty() || rawIndexData.empty()) {
+            Logger::Warning("Mesh::CreateBuffers - no data to create buffers");
+            return;
+        }
+        
+        // Create vertex buffer
+        vertexBuffer = std::make_unique<Buffer>();
+        vertexBuffer->Initialize(
+            device,
+            static_cast<uint32_t>(rawVertexData.size()),
+            BufferType::Vertex,
+            D3D12_HEAP_TYPE_UPLOAD
+        );
+        vertexBuffer->Upload(rawVertexData.data(), static_cast<uint32_t>(rawVertexData.size()));
+        
+        // Create index buffer  
+        indexBuffer = std::make_unique<Buffer>();
+        indexBuffer->Initialize(
+            device,
+            static_cast<uint32_t>(rawIndexData.size()),
+            BufferType::Index,
+            D3D12_HEAP_TYPE_UPLOAD
+        );
+        indexBuffer->Upload(rawIndexData.data(), static_cast<uint32_t>(rawIndexData.size()));
+        
+        Logger::Info("Mesh::CreateBuffers - GPU buffers created successfully");
     }
 
     // =====================================================

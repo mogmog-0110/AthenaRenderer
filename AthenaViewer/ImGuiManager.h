@@ -68,29 +68,32 @@ namespace Athena {
         bool IsRenderingModeChanged() const { return renderingModeChanged; }
         bool IsDeferredRenderingEnabled() const { return enableDeferredRendering; }
         
-        bool IsGeometryModeChanged() const { return geometryModeChanged; }
-        int GetCurrentGeometryMode() const { return currentGeometry; }
-        
         bool IsCameraResetRequested() const { return cameraResetRequested; }
+        bool IsMouseCaptureChanged() const { return mouseCaptureChanged; }
+        bool IsMouseCaptured() const { return mouseCaptured; }
         
         void ResetChangeFlags() { 
             renderingModeChanged = false; 
-            geometryModeChanged = false; 
             cameraResetRequested = false;
+            mouseCaptureChanged = false;
         }
 
         // Performance information update
         void UpdatePerformanceStats(float deltaTime);
+        
+        // Rendering statistics update
+        void UpdateRenderingStats(uint32_t drawCalls, uint32_t vertexCount, float memoryUsageMB);
+        void UpdateRenderGraphStats(uint32_t totalPasses, uint32_t totalResources, uint32_t executedPasses, float renderGraphMemoryMB);
 
     private:
         bool initialized;
         
         // UI control state
         bool enableDeferredRendering;
-        int currentGeometry; // 0: Cube, 1: Sphere
         bool renderingModeChanged;
-        bool geometryModeChanged;
         bool cameraResetRequested;
+        bool mouseCaptured;
+        bool mouseCaptureChanged;
         
         // Performance statistics
         float currentFPS;
@@ -106,6 +109,17 @@ namespace Athena {
         
         // RenderGraph statistics
         bool showRenderGraphStats;
+        
+        // Rendering statistics
+        uint32_t drawCallCount;
+        uint32_t vertexCount;
+        float memoryUsageMB;
+        
+        // RenderGraph statistics
+        uint32_t renderGraphTotalPasses;
+        uint32_t renderGraphTotalResources;
+        uint32_t renderGraphExecutedPasses;
+        float renderGraphMemoryMB;
         
         /**
          * Render camera control UI

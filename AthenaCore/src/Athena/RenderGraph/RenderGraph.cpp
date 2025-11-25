@@ -1,5 +1,6 @@
 #define NOMINMAX
 #include "Athena/RenderGraph/RenderGraph.h"
+#include "Athena/RenderGraph/RenderGraphBuilder.h"
 #include "Athena/Core/Device.h"
 #include "Athena/Resources/Texture.h"
 #include "Athena/Resources/Buffer.h"
@@ -117,9 +118,10 @@ namespace Athena {
         for (auto& passInfo : passes) {
             if (!passInfo.pass) continue;
             
-            // TODO: RenderGraphBuilderを実装してからSetupを呼び出す
-            // passInfo.setupData.builder = &builder;
-            // passInfo.pass->Setup(passInfo.setupData);
+            // RenderGraphBuilderを作成してパスセットアップを実行
+            RenderGraphBuilder builder(this);
+            passInfo.setupData.builder = &builder;
+            passInfo.pass->Setup(passInfo.setupData);
         }
         
         // ステップ3: 依存関係解析
@@ -201,7 +203,14 @@ namespace Athena {
             executeData.boolParams = passInfo.setupData.boolParams;
             
             // 入力・出力リソースを設定
-            // TODO: リソースハンドルから実際のリソースマッピングを設定
+            // RenderGraphBuilderで設定されたリソースマッピングを適用
+            for (const auto& inputHandle : passInfo.inputs) {
+                executeData.inputs[inputHandle.GetName()] = inputHandle;
+            }
+            
+            for (const auto& outputHandle : passInfo.outputs) {
+                executeData.outputs[outputHandle.GetName()] = outputHandle;
+            }
             
             // コマンドリストを取得（仮の実装）
             ID3D12GraphicsCommandList* commandList = executeData.commandList;

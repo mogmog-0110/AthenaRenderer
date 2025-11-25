@@ -203,14 +203,15 @@ private:
         
         // 各パスをRenderGraphに追加してセットアップ
         if (geometryPass && device) {
-            // まず独自にSetupを実行（RenderGraphに追加する前に）
+            // まず独自にSetupを実行
             PassSetupData setupData;
             setupData.device = device->GetD3D12Device();
             geometryPass->Setup(setupData);
             Logger::Info("RenderGraphExample: GeometryPass setup completed");
             
-            // RenderGraphにパスを追加（このパスはstd::unique_ptrで管理されるため注意）
-            // 現在のシンプル実装では、RenderGraphに追加せずに直接管理
+            // RenderGraphにパスを追加（注意：パスの所有権をRenderGraphに移譲しないため、警告は残る）
+            // 現在の設計では個別管理を維持し、RenderGraphは主にリソース管理に使用
+            Logger::Info("RenderGraphExample: GeometryPass managed independently");
         }
         
         if (lightingPass && device) {

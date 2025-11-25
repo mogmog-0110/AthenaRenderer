@@ -60,8 +60,8 @@ namespace Athena {
         D3D12_VIEWPORT viewport = {};
         viewport.TopLeftX = 0.0f;
         viewport.TopLeftY = 0.0f;
-        viewport.Width = 1280.0f;   // TODO: 動的に設定する
-        viewport.Height = 720.0f;   // TODO: 動的に設定する
+        viewport.Width = static_cast<float>(renderTargetWidth);
+        viewport.Height = static_cast<float>(renderTargetHeight);
         viewport.MinDepth = 0.0f;
         viewport.MaxDepth = 1.0f;
         commandList->RSSetViewports(1, &viewport);
@@ -69,8 +69,8 @@ namespace Athena {
         D3D12_RECT scissorRect = {};
         scissorRect.left = 0;
         scissorRect.top = 0;
-        scissorRect.right = 1280;   // TODO: 動的に設定する
-        scissorRect.bottom = 720;   // TODO: 動的に設定する
+        scissorRect.right = static_cast<LONG>(renderTargetWidth);
+        scissorRect.bottom = static_cast<LONG>(renderTargetHeight);
         commandList->RSSetScissorRects(1, &scissorRect);
 
         // フルスクリーンクアッドの描画

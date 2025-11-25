@@ -112,7 +112,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;..\external\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -120,7 +120,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib;..\external\assimp\lib\x64\Debug\assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -133,13 +133,16 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;..\external\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
       </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib;..\external\assimp\lib\x64\Release\assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\Athena\Resources\Buffer.h" />
@@ -160,6 +163,10 @@
     <ClInclude Include="include\Athena\RenderGraph\GeometryPass.h" />
     <ClInclude Include="include\Athena\RenderGraph\LightingPass.h" />
     <ClInclude Include="include\Athena\RenderGraph\ToneMappingPass.h" />
+    <ClInclude Include="include\Athena\Scene\ModelLoader.h" />
+    <ClInclude Include="include\Athena\Scene\CameraController.h" />
+    <ClInclude Include="include\Athena\Scene\SceneObject.h" />
+    <ClInclude Include="include\Athena\Scene\Scene.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Athena\Resources\Buffer.cpp" />
@@ -179,6 +186,10 @@
     <ClCompile Include="src\Athena\RenderGraph\GeometryPass.cpp" />
     <ClCompile Include="src\Athena\RenderGraph\LightingPass.cpp" />
     <ClCompile Include="src\Athena\RenderGraph\ToneMappingPass.cpp" />
+    <ClCompile Include="src\Athena\Scene\ModelLoader.cpp" />
+    <ClCompile Include="src\Athena\Scene\CameraController.cpp" />
+    <ClCompile Include="src\Athena\Scene\SceneObject.cpp" />
+    <ClCompile Include="src\Athena\Scene\Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

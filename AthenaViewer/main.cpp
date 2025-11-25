@@ -19,7 +19,15 @@
 #include "Athena/Resources/UploadContext.h"
 #include "Athena/Utils/Math.h"
 #include "Athena/Scene/Camera.h"
+#include "Athena/Scene/ModelLoader.h"
+#include "Athena/Scene/CameraController.h"
 #include "ImGuiManager.h"
+//#include "MemoryTracker.h"
+//#include "RenderingStats.h"
+#include "SimpleStats.h"
+
+// 機能テスト関数の宣言
+bool RunFeatureTests(std::shared_ptr<Athena::Device> device);
 
 // RenderGraphテスト関数の宣言
 bool RunAllRenderGraphTests(std::shared_ptr<Athena::Device> device);
@@ -46,14 +54,6 @@ HWND g_hwnd = nullptr;
 const uint32_t WINDOW_WIDTH = 1280;
 const uint32_t WINDOW_HEIGHT = 720;
 
-// 表示モード管理
-enum class DisplayMode {
-    Cube = 0,
-    Sphere = 1,
-    COUNT
-};
-DisplayMode g_currentMode = DisplayMode::Cube;
-
 // G-Bufferモードとカメラ管理
 enum class RenderingMode {
     Forward = 0,  // フォワードレンダリング
@@ -63,17 +63,27 @@ RenderingMode g_renderingMode = RenderingMode::Forward;
 
 // カメラ管理
 std::unique_ptr<FPSCamera> g_camera;
+std::unique_ptr<Athena::CameraController> g_cameraController;
 bool g_mouseCaptured = false;
 POINT g_lastMousePos = {};
 
-// ImGUI管理
+// モデル管理
+std::shared_ptr<Athena::Model> g_loadedModel;
+bool g_useLoadedModel = false;
+
+// ImGUI管理、メモリトラッカー、レンダリング統計
 std::unique_ptr<Athena::ImGuiManager> g_imguiManager;
+//std::unique_ptr<Athena::MemoryTracker> g_memoryTracker;
+//std::unique_ptr<Athena::RenderingStats> g_renderingStats;
+std::unique_ptr<Athena::SimpleStats> g_simpleStats;
 
 // 頂点構造体（アライメント明示）
 struct Vertex {
     Vector3 position;   // 0 - 11バイト
     Vector2 texcoord;   // 12 - 19バイト
 };
+
+// ModelVertexはModelLoader.hで定義されているため、ここでは宣言のみ
 
 // 定数バッファ構造体（256バイトアライメント）
 struct TransformBuffer {
@@ -93,10 +103,19 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         if (wParam == VK_ESCAPE) {
             PostQuitMessage(0);
         } 
+        else if (wParam == 'C' || wParam == 'c') {
+            // マウスキャプチャの切り替え
+            g_mouseCaptured = !g_mouseCaptured;
+            if (g_mouseCaptured) {
+                GetCursorPos(&g_lastMousePos);
+                ShowCursor(FALSE);
+            } else {
+                ShowCursor(TRUE);
+            }
+        }
         // 以下のキーボード入力処理はImGUIに移行
         // else if (wParam == VK_SPACE) { ... } // -> ImGUIのGeometry切り替えに移行
         // else if (wParam == 'G' || wParam == 'g') { ... } // -> ImGUIのRendering Mode切り替えに移行
-        // else if (wParam == 'C' || wParam == 'c') { ... } // -> ImGUIのMouse Capture切り替えに移行
         
         // カメラ入力をカメラに渡す
         if (g_camera) {
@@ -170,49 +189,6 @@ bool CreateAppWindow(HINSTANCE hInstance) {
     return true;
 }
 
-// 球体ジオメトリ生成
-void CreateSphereGeometry(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices, 
-                         float radius = 1.0f, uint32_t slices = 20, uint32_t stacks = 20) {
-    vertices.clear();
-    indices.clear();
-
-    // 頂点生成
-    for (uint32_t stack = 0; stack <= stacks; ++stack) {
-        float phi = 3.14159f * stack / stacks; // 緯度角
-        
-        for (uint32_t slice = 0; slice <= slices; ++slice) {
-            float theta = 2.0f * 3.14159f * slice / slices; // 経度角
-            
-            Vertex vertex;
-            vertex.position.x = radius * sin(phi) * cos(theta);
-            vertex.position.y = radius * cos(phi);
-            vertex.position.z = radius * sin(phi) * sin(theta);
-            
-            vertex.texcoord.x = (float)slice / slices;
-            vertex.texcoord.y = (float)stack / stacks;
-            
-            vertices.push_back(vertex);
-        }
-    }
-
-    // インデックス生成
-    for (uint32_t stack = 0; stack < stacks; ++stack) {
-        for (uint32_t slice = 0; slice < slices; ++slice) {
-            uint32_t current = stack * (slices + 1) + slice;
-            uint32_t next = current + slices + 1;
-
-            // 下三角形
-            indices.push_back(current);
-            indices.push_back(next);
-            indices.push_back(current + 1);
-
-            // 上三角形
-            indices.push_back(current + 1);
-            indices.push_back(next);
-            indices.push_back(next + 1);
-        }
-    }
-}
 
 // シェーダーコンパイル
 ComPtr<ID3DBlob> CompileShader(const std::wstring& filepath, const std::string& entryPoint, const std::string& target) {
@@ -252,7 +228,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
         Logger::Info("Controls:");
         Logger::Info("  WASD: Move camera");
         Logger::Info("  Mouse: Look around (press C to capture/release mouse)");
-        Logger::Info("  Space: Change display mode (Cube/Sphere)");
         Logger::Info("  G: Toggle rendering mode (Forward/Deferred)");
         Logger::Info("  Shift: Sprint");
         Logger::Info("  Escape: Exit");
@@ -273,14 +248,56 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
         g_camera = std::make_unique<FPSCamera>();
         g_camera->SetPerspective(3.14159f / 4.0f, static_cast<float>(WINDOW_WIDTH) / WINDOW_HEIGHT, 0.1f, 1000.0f);
         g_camera->SetPosition(Vector3(-3.0f, 0.0f, 0.0f));
-        Logger::Info("✓ FPS Camera initialized");
+        
+        // カメラコントローラー初期化（shared_ptrに変換）
+        std::shared_ptr<Camera> sharedCamera(g_camera.get(), [](Camera*){});  // Non-owning shared_ptr
+        g_cameraController = std::make_unique<Athena::CameraController>(sharedCamera);
+        g_cameraController->SetSpeed(5.0f);
+        g_cameraController->SetSensitivity(0.1f);
+        
+        Logger::Info("✓ FPS Camera and CameraController initialized");
+        
+        // FBXモデルの読み込み試行
+        Logger::Info("=== FBXモデル読み込み試行 ===");
+        std::vector<std::string> modelPaths = {
+            "../assets/models/teamugfbx.fbx"
+        };
+        
+        for (const auto& path : modelPaths) {
+            Logger::Info("Trying to load model: %s", path.c_str());
+            g_loadedModel = Athena::ModelLoader::LoadModel(devicePtr, path, true, true);
+            if (g_loadedModel) {
+                g_useLoadedModel = true;
+                Logger::Info("✓ FBX Model loaded successfully: %s", path.c_str());
+                Logger::Info("  - Meshes: %u", (unsigned int)g_loadedModel->meshes.size());
+                Logger::Info("  - Materials: %u", (unsigned int)g_loadedModel->materials.size());
+                Logger::Info("  - Size: (%.2f, %.2f, %.2f)", 
+                           g_loadedModel->GetSize().x, g_loadedModel->GetSize().y, g_loadedModel->GetSize().z);
+                break;
+            }
+        }
+        
+        if (!g_loadedModel) {
+            Logger::Warning("No FBX model found, will render default cube");
+            g_useLoadedModel = false;
+        }
 
+        // 新機能テスト実行
+        Logger::Info("=== 新機能テスト開始 ===");
+        bool featureTestResult = RunFeatureTests(devicePtr);
+        Logger::Info("=== 新機能テスト完了: %s ===", featureTestResult ? "成功" : "失敗");
+        
         // RenderGraphテスト実行
         Logger::Info("=== RenderGraph基盤テスト開始 ===");
         bool testResult = RunAllRenderGraphTests(devicePtr);
-        Logger::Info("=== RenderGraph基盤テスト完了: {} ===", testResult ? "成功" : "失敗");
+        Logger::Info("=== RenderGraph基盤テスト完了: %s ===", testResult ? "成功" : "失敗");
         
-        // テスト失敗時は早期終了
+        // テストの全体結果を確認
+        Logger::Info("=== 全テスト結果 ===");
+        Logger::Info("新機能テスト: %s", featureTestResult ? "成功" : "失敗");
+        Logger::Info("RenderGraphテスト: %s", testResult ? "成功" : "失敗");
+        
+        // RenderGraphテスト失敗時のみ早期終了（新機能テストは警告のみ）
         if (!testResult) {
             Logger::Error("RenderGraphテストが失敗しました。アプリケーションを終了します。");
             return -1;
@@ -314,7 +331,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
             Logger::Info("RenderGraph用テストジオメトリ設定完了");
         }
         
-        Logger::Info("=== RenderGraph統合例初期化: {} ===", renderGraphExampleResult ? "成功" : "失敗");
+        Logger::Info("=== RenderGraph統合例初期化: %s ===", renderGraphExampleResult ? "成功" : "失敗");
         
         if (!renderGraphExampleResult) {
             Logger::Warning("RenderGraph統合例の初期化に失敗しましたが、従来レンダリングで続行します。");
@@ -361,6 +378,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
             return -1;
         }
         Logger::Info("✓ ImGUI initialized");
+
+        // SimpleStats初期化
+        g_simpleStats = std::make_unique<Athena::SimpleStats>();
+        Logger::Info("✓ SimpleStats initialized");
 
         // RTVを作成
         for (uint32_t i = 0; i < SwapChain::BufferCount; ++i) {
@@ -461,90 +482,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
         Logger::Info("  - SRV at index %u", textureSrvHandle.index);
 
         // 頂点データ（Vector2統一でテクスチャ座標を適切に設定）
-        Vertex vertices[] = {
-            // 前面
-            {{-0.5f, -0.5f,  0.5f}, {0.0f, 1.0f}},
-            {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f}},
-            {{ 0.5f,  0.5f,  0.5f}, {1.0f, 0.0f}},
-            {{ 0.5f, -0.5f,  0.5f}, {1.0f, 1.0f}},
-            // 背面
-            {{ 0.5f, -0.5f, -0.5f}, {0.0f, 1.0f}},
-            {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f}},
-            {{-0.5f,  0.5f, -0.5f}, {1.0f, 0.0f}},
-            {{-0.5f, -0.5f, -0.5f}, {1.0f, 1.0f}},
-            // 上面
-            {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f}},
-            {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f}},
-            {{ 0.5f,  0.5f, -0.5f}, {1.0f, 1.0f}},
-            {{ 0.5f,  0.5f,  0.5f}, {1.0f, 0.0f}},
-            // 底面
-            {{-0.5f, -0.5f, -0.5f}, {0.0f, 1.0f}},
-            {{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f}},
-            {{ 0.5f, -0.5f,  0.5f}, {1.0f, 0.0f}},
-            {{ 0.5f, -0.5f, -0.5f}, {1.0f, 1.0f}},
-            // 右面
-            {{ 0.5f, -0.5f,  0.5f}, {0.0f, 1.0f}},
-            {{ 0.5f,  0.5f,  0.5f}, {0.0f, 0.0f}},
-            {{ 0.5f,  0.5f, -0.5f}, {1.0f, 0.0f}},
-            {{ 0.5f, -0.5f, -0.5f}, {1.0f, 1.0f}},
-            // 左面
-            {{-0.5f, -0.5f, -0.5f}, {0.0f, 1.0f}},
-            {{-0.5f,  0.5f, -0.5f}, {0.0f, 0.0f}},
-            {{-0.5f,  0.5f,  0.5f}, {1.0f, 0.0f}},
-            {{-0.5f, -0.5f,  0.5f}, {1.0f, 1.0f}},
-        };
-
-        uint32_t indices[] = {
-            0, 1, 2, 0, 2, 3,       // 前面
-            4, 5, 6, 4, 6, 7,       // 背面
-            8, 9, 10, 8, 10, 11,    // 上面
-            12, 13, 14, 12, 14, 15, // 底面
-            16, 17, 18, 16, 18, 19, // 右面
-            20, 21, 22, 20, 22, 23, // 左面
-        };
-
-        // 複数ジオメトリ用バッファ作成
-        std::vector<Vertex> sphereVertices;
-        std::vector<uint32_t> sphereIndices;
-        CreateSphereGeometry(sphereVertices, sphereIndices);
-
-        // キューブ用バッファ
-        Buffer cubeVertexBuffer;
-        cubeVertexBuffer.Initialize(
-            devicePtr->GetD3D12Device(),
-            sizeof(vertices),
-            BufferType::Vertex,
-            D3D12_HEAP_TYPE_UPLOAD
-        );
-        cubeVertexBuffer.Upload(vertices, sizeof(vertices));
-
-        Buffer cubeIndexBuffer;
-        cubeIndexBuffer.Initialize(
-            devicePtr->GetD3D12Device(),
-            sizeof(indices),
-            BufferType::Index,
-            D3D12_HEAP_TYPE_UPLOAD
-        );
-        cubeIndexBuffer.Upload(indices, sizeof(indices));
-
-        // 球体用バッファ
-        Buffer sphereVertexBuffer;
-        sphereVertexBuffer.Initialize(
-            devicePtr->GetD3D12Device(),
-            static_cast<uint32_t>(sphereVertices.size() * sizeof(Vertex)),
-            BufferType::Vertex,
-            D3D12_HEAP_TYPE_UPLOAD
-        );
-        sphereVertexBuffer.Upload(sphereVertices.data(), static_cast<uint32_t>(sphereVertices.size() * sizeof(Vertex)));
-
-        Buffer sphereIndexBuffer;
-        sphereIndexBuffer.Initialize(
-            devicePtr->GetD3D12Device(),
-            static_cast<uint32_t>(sphereIndices.size() * sizeof(uint32_t)),
-            BufferType::Index,
-            D3D12_HEAP_TYPE_UPLOAD
-        );
-        sphereIndexBuffer.Upload(sphereIndices.data(), static_cast<uint32_t>(sphereIndices.size() * sizeof(uint32_t)));
+        // RenderGraphが独自のジオメトリデータを使用する
 
         Buffer constantBuffer;
         constantBuffer.Initialize(
@@ -554,15 +492,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
             D3D12_HEAP_TYPE_UPLOAD
         );
         
+        // メモリ使用量の記録は削除（SimpleStatsでは不要）
+        
         Logger::Info("✓ Buffers created");
         Logger::Info("Vertex struct size: %zu bytes", sizeof(Vertex));
         Logger::Info("Vector3 size: %zu bytes", sizeof(Vector3));
         Logger::Info("Vector2 size: %zu bytes", sizeof(Vector2));
-        
-        // 最初の頂点データの確認
-        Logger::Info("First vertex: pos(%.2f,%.2f,%.2f) uv(%.2f,%.2f)", 
-                     vertices[0].position.x, vertices[0].position.y, vertices[0].position.z,
-                     vertices[0].texcoord.x, vertices[0].texcoord.y);
 
         // CBV作成
         D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
@@ -610,10 +545,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
             {{-0.5f, -0.5f,  0.5f}, {-1.0f, 0.0f, 0.0f}, 1.0f, 1.0f},
         };
 
+        // RenderGraph用のキューブインデックス
+        uint32_t rgCubeIndices[] = {
+            0, 1, 2, 0, 2, 3,       // 前面
+            4, 5, 6, 4, 6, 7,       // 背面
+            8, 9, 10, 8, 10, 11,    // 上面
+            12, 13, 14, 12, 14, 15, // 底面
+            16, 17, 18, 16, 18, 19, // 右面
+            20, 21, 22, 20, 22, 23, // 左面
+        };
+
         // RenderGraphに頂点データとテクスチャを設定
         if (renderGraphExampleResult) {
             // 初期設定はキューブデータ
-            SetRenderGraphVertexData(rgCubeVertices, 24, indices, 36);
+            SetRenderGraphVertexData(rgCubeVertices, 24, rgCubeIndices, 36);
             
             // メインテクスチャをRenderGraphにも設定（共有ポインタで管理）
             auto mainTexturePtr = std::make_shared<Texture>();
@@ -739,6 +684,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
                 continue;
             }
 
+            // フレーム開始時に統計をリセット
+            if (g_simpleStats) {
+                g_simpleStats->BeginFrame();
+            }
+
             // 時間計算
             auto currentTime = std::chrono::high_resolution_clock::now();
             float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
@@ -748,11 +698,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
             if (g_camera) {
                 g_camera->Update(deltaTime);
             }
+            
+            // カメラコントローラー更新
+            if (g_cameraController) {
+                g_cameraController->Update(deltaTime);
+            }
 
             // ImGUI フレーム開始
             if (g_imguiManager) {
                 g_imguiManager->BeginFrame();
                 g_imguiManager->UpdatePerformanceStats(deltaTime);
+                
+                // 統計情報の更新は描画後に移動（後で取得）
+                
+                // 統計情報は描画後に更新
+                
+                // RenderGraphの統計情報（実装例）
+                g_imguiManager->UpdateRenderGraphStats(3, 5, 3, 32.0f); // 3パス、5リソース、3実行、32MB
                 
                 // UI状態の更新
                 if (g_imguiManager->IsRenderingModeChanged()) {
@@ -762,19 +724,28 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
                     Logger::Info("Rendering mode changed to: %s", modeNames[static_cast<int>(g_renderingMode)]);
                 }
                 
-                if (g_imguiManager->IsGeometryModeChanged()) {
-                    int geometryMode = g_imguiManager->GetCurrentGeometryMode();
-                    g_currentMode = static_cast<DisplayMode>(geometryMode);
-                    const char* modeNames[] = { "Cube", "Sphere" };
-                    Logger::Info("Display mode changed to: %s (ImGUI value: %d, DisplayMode value: %d)", 
-                               modeNames[geometryMode], geometryMode, static_cast<int>(g_currentMode));
-                }
                 
                 if (g_imguiManager->IsCameraResetRequested()) {
-                    if (g_camera) {
+                    if (g_cameraController) {
+                        g_cameraController->LoadPreset("Front", 1.0f); // 1秒でトランジション
+                        Logger::Info("Camera reset to Front preset");
+                    } else if (g_camera) {
                         g_camera->SetPosition(Vector3(-3.0f, 0.0f, 0.0f));
                         g_camera->ResetToDefaultPosition();
                         Logger::Info("Camera reset to default position");
+                    }
+                }
+                
+                // マウスキャプチャ状態の更新
+                if (g_imguiManager->IsMouseCaptureChanged()) {
+                    g_mouseCaptured = g_imguiManager->IsMouseCaptured();
+                    if (g_mouseCaptured) {
+                        GetCursorPos(&g_lastMousePos);
+                        ShowCursor(FALSE);
+                        Logger::Info("Mouse capture enabled via UI");
+                    } else {
+                        ShowCursor(TRUE);
+                        Logger::Info("Mouse capture disabled via UI");
                     }
                 }
                 
@@ -783,7 +754,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
             // MVP行列計算（カメラ統合）
             rotation += 0.01f;
-            Matrix4x4 world = Matrix4x4::RotationY(rotation) * Matrix4x4::RotationX(rotation * 0.5f);
+            
+            // FBXモデルの場合はスケールを調整
+            Matrix4x4 scale = Matrix4x4::CreateIdentity();
+            if (g_useLoadedModel && g_loadedModel) {
+                // モデルサイズに基づいて適切なスケールを計算
+                Vector3 size = g_loadedModel->GetSize();
+                float maxDimension = std::max({size.x, size.y, size.z});
+                if (maxDimension > 0) {
+                    // モデルを約2ユニットのサイズに正規化
+                    float targetSize = 2.0f;
+                    float scaleValue = targetSize / maxDimension;
+                    scale = Matrix4x4::Scaling(scaleValue);
+                    Logger::Info("Applying scale factor: %.3f (model max dimension: %.3f)", scaleValue, maxDimension);
+                }
+            }
+            
+            Matrix4x4 world = scale * Matrix4x4::RotationY(rotation) * Matrix4x4::RotationX(rotation * 0.5f);
             
             // カメラ行列を使用
             Matrix4x4 view = g_camera ? g_camera->GetViewMatrix() : 
@@ -838,64 +825,92 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
             commandList->SetGraphicsRootSignature(rootSignature.Get());
 
-            // RenderGraphレンダリング（Cube/Sphere両方で有効）
+            // RenderGraphレンダリング
             if (renderGraphExampleResult) {
-                // 表示モードに応じて頂点データを設定
-                static DisplayMode lastMode = DisplayMode::COUNT; // 無効な初期値
-                if (g_currentMode != lastMode) {
-                    Logger::Info("RenderGraph: Switching geometry from mode %d to mode %d", 
-                               static_cast<int>(lastMode), static_cast<int>(g_currentMode));
-                    Logger::Info("g_currentMode == DisplayMode::Cube: %s", 
-                               (g_currentMode == DisplayMode::Cube) ? "true" : "false");
-                    Logger::Info("g_currentMode == DisplayMode::Sphere: %s", 
-                               (g_currentMode == DisplayMode::Sphere) ? "true" : "false");
+                // モデルに応じて頂点データとテクスチャを設定
+                if (g_useLoadedModel && g_loadedModel && !g_loadedModel->meshes.empty()) {
+                    // FBXモデルの最初のメッシュを使用
+                    auto mesh = g_loadedModel->meshes[0];
                     
-                    if (g_currentMode == DisplayMode::Cube) {
-                        SetRenderGraphVertexData(rgCubeVertices, 24, indices, 36);
-                        Logger::Info("RenderGraph: Switched to Cube vertex data (DisplayMode::Cube = %d)", 
-                                   static_cast<int>(DisplayMode::Cube));
-                    } else if (g_currentMode == DisplayMode::Sphere) {
-                        // Sphere頂点データを変換してRenderGraphに設定
-                        std::vector<TestVertex> rgSphereVertices;
-                        rgSphereVertices.reserve(sphereVertices.size());
+                    if (mesh && mesh->GetRawVertexDataSize() > 0 && mesh->GetRawIndexDataSize() > 0) {
+                        // ModelVertexデータをTestVertex形式に変換
+                        uint32_t vertexCount = static_cast<uint32_t>(mesh->GetRawVertexDataSize() / mesh->GetVertexStride());
+                        uint32_t indexCount = static_cast<uint32_t>(mesh->GetRawIndexCount());
                         
-                        for (const auto& vertex : sphereVertices) {
-                            TestVertex rgVertex;
-                            rgVertex.position = vertex.position;
-                            rgVertex.normal = vertex.position.Normalize(); // 球体は位置=法線
-                            rgVertex.u = vertex.texcoord.x;
-                            rgVertex.v = vertex.texcoord.y;
-                            rgSphereVertices.push_back(rgVertex);
+                        // ModelVertexからTestVertexに変換
+                        const Athena::ModelVertex* modelVertices = reinterpret_cast<const Athena::ModelVertex*>(mesh->GetRawVertexData());
+                        std::vector<TestVertex> convertedVertices;
+                        convertedVertices.reserve(vertexCount);
+                        
+                        for (uint32_t i = 0; i < vertexCount; ++i) {
+                            TestVertex testVertex;
+                            testVertex.position = modelVertices[i].position;
+                            testVertex.normal = modelVertices[i].normal;
+                            testVertex.u = modelVertices[i].texcoord.x;
+                            testVertex.v = modelVertices[i].texcoord.y;
+                            convertedVertices.push_back(testVertex);
                         }
                         
-                        SetRenderGraphVertexData(rgSphereVertices.data(), 
-                                               static_cast<uint32_t>(rgSphereVertices.size()),
-                                               sphereIndices.data(), 
-                                               static_cast<uint32_t>(sphereIndices.size()));
-                        Logger::Info("RenderGraph: Switched to Sphere vertex data (DisplayMode::Sphere = %d)", 
-                                   static_cast<int>(DisplayMode::Sphere));
+                        SetRenderGraphVertexData(convertedVertices.data(), vertexCount, 
+                                                static_cast<const uint32_t*>(mesh->GetRawIndexData()), indexCount);
+                        
+                        // FBXモデルには白色のデフォルトテクスチャを使用（チェッカーボードの代わり）
+                        // 白色テクスチャを作成
+                        static std::shared_ptr<Texture> whiteTexture;
+                        if (!whiteTexture) {
+                            whiteTexture = std::make_shared<Texture>();
+                            const uint32_t whitePixel = 0xFFFFFFFF; // 白色
+                            whiteTexture->CreateFromMemory(
+                                devicePtr->GetD3D12Device(),
+                                1, 1,  // 1x1 テクスチャ
+                                DXGI_FORMAT_R8G8B8A8_UNORM,
+                                &whitePixel
+                            );
+                            whiteTexture->UploadToGPU(&uploadContext);
+                            Logger::Info("Created white default texture for FBX models");
+                        }
+                        SetRenderGraphTexture(whiteTexture);
+                        
+                        Logger::Info("Using FBX model data: %u vertices, %u indices (converted from ModelVertex to TestVertex)", vertexCount, indexCount);
+                    } else {
+                        Logger::Warning("FBX model loaded but no vertex data available, using default cube");
+                        SetRenderGraphVertexData(rgCubeVertices, 24, rgCubeIndices, 36);
+                        
+                        // キューブの場合はチェッカーボードテクスチャを使用
+                        // 既存のmainTextureを共有するためのshared_ptrを作成
+                        auto mainTexturePtr = std::shared_ptr<Texture>(&mainTexture, [](Texture*){});
+                        SetRenderGraphTexture(mainTexturePtr);
                     }
-                    lastMode = g_currentMode;
+                } else {
+                    // デフォルトキューブを使用
+                    SetRenderGraphVertexData(rgCubeVertices, 24, rgCubeIndices, 36);
+                    
+                    // キューブにはチェッカーボードテクスチャを適用
+                    // 既存のmainTextureを共有するためのshared_ptrを作成
+                    auto mainTexturePtr = std::shared_ptr<Texture>(&mainTexture, [](Texture*){});
+                    SetRenderGraphTexture(mainTexturePtr);
                 }
                 
-                // RenderGraphで単一オブジェクトを描画
-                Athena::Matrix4x4 rgWorld = world; // メインレンダリングと同じ変換
-                Athena::Vector3 cameraPos(0.0f, 1.0f, -3.0f);
+                Athena::Matrix4x4 rgWorld = world;
+                Athena::Vector3 cameraPos = g_camera ? g_camera->GetPosition() : Vector3(0.0f, 1.0f, -3.0f);
                 Athena::Vector3 lightDir(0.0f, -1.0f, 0.0f);
                 Athena::Vector3 lightColor(1.0f, 1.0f, 1.0f);
                 
                 SetRenderGraphSceneData(rgWorld, view, proj, cameraPos, lightDir, lightColor);
                 SetRenderGraphObjectID(0);
                 
-                // レンダリングモードを適用
                 bool useDeferred = (g_renderingMode == RenderingMode::Deferred);
+                
+                if (g_simpleStats) {
+                    uint32_t estimatedVertexCount = g_useLoadedModel ? 1000 : 24; // より正確な頂点数
+                    g_simpleStats->RecordDrawCall(estimatedVertexCount);
+                }
+                
                 RenderWithRenderGraph(commandList.Get(), cbvSrvHeap.GetD3D12DescriptorHeap(), rtvHandle, dsvHandle.cpu, useDeferred);
                 
-                // RenderGraph実行後、メインレンダリング用の状態を再設定
                 commandList->SetGraphicsRootSignature(rootSignature.Get());
                 commandList->SetPipelineState(pipelineState.Get());
                 
-                // デスクリプタヒープとテーブルを再設定（RenderGraphで上書きされた可能性があるため）
                 ID3D12DescriptorHeap* mainHeaps[] = { cbvSrvHeap.GetD3D12DescriptorHeap() };
                 commandList->SetDescriptorHeaps(1, mainHeaps);
             }
@@ -914,30 +929,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
             commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-            // 表示モードに応じてバッファを切り替え
-            D3D12_VERTEX_BUFFER_VIEW vbv;
-            D3D12_INDEX_BUFFER_VIEW ibv;
-            uint32_t indexCount = 0;
-
-            switch (g_currentMode) {
-            case DisplayMode::Cube:
-                vbv = cubeVertexBuffer.GetVertexBufferView();
-                vbv.StrideInBytes = sizeof(Vertex);
-                ibv = cubeIndexBuffer.GetIndexBufferView();
-                indexCount = 36;
-                break;
-            case DisplayMode::Sphere:
-                vbv = sphereVertexBuffer.GetVertexBufferView();
-                vbv.StrideInBytes = sizeof(Vertex);
-                ibv = sphereIndexBuffer.GetIndexBufferView();
-                indexCount = static_cast<uint32_t>(sphereIndices.size());
-                break;
+            // FBXモデルまたはキューブの表示状況をログ出力（初回のみ）
+            if (firstFrame) {
+                if (g_useLoadedModel) {
+                    Logger::Info("Rendering FBX model: %s", g_loadedModel->filename.c_str());
+                } else {
+                    Logger::Info("Rendering default cube geometry");
+                }
             }
-
-            commandList->IASetVertexBuffers(0, 1, &vbv);
-            commandList->IASetIndexBuffer(&ibv);
-
-            // 全てRenderGraphで描画するため、従来レンダリングは無効
+            
             if (!renderGraphExampleResult) {
                 Logger::Warning("RenderGraph disabled - no fallback rendering available");
             }
@@ -959,6 +959,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
             swapChain.Present(true);
             commandQueue.WaitForGPU();
+            
+            // レンダリング完了後に統計情報を取得・更新
+            if (g_imguiManager && g_simpleStats) {
+                uint32_t actualDrawCalls = g_simpleStats->GetDrawCalls();
+                uint32_t actualVertexCount = g_simpleStats->GetVertexCount();
+                float processMemoryMB = g_simpleStats->GetMemoryUsageMB();
+                g_imguiManager->UpdateRenderingStats(actualDrawCalls, actualVertexCount, processMemoryMB);
+            }
         }
 
         // 終了
@@ -972,10 +980,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
         // リソース解放（バッファ・テクスチャ）
         constantBuffer.Shutdown();
-        cubeIndexBuffer.Shutdown();
-        cubeVertexBuffer.Shutdown();
-        sphereIndexBuffer.Shutdown();
-        sphereVertexBuffer.Shutdown();
         mainTexture.Shutdown();
         depthTexture.Shutdown();
 

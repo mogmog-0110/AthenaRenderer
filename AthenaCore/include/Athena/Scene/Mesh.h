@@ -1,4 +1,4 @@
-// Mesh.h - ƒƒbƒVƒ…ƒNƒ‰ƒX
+// Mesh.h - ï¿½ï¿½ï¿½bï¿½Vï¿½ï¿½ï¿½Nï¿½ï¿½ï¿½X
 #pragma once
 
 #include "Athena/Utils/Math.h"
@@ -9,20 +9,20 @@
 namespace Athena {
 
     // =====================================================
-    // ’¸“_ƒtƒH[ƒ}ƒbƒg
+    // ï¿½ï¿½ï¿½_ï¿½tï¿½Hï¿½[ï¿½}ï¿½bï¿½g
     // =====================================================
 
     /**
-     * @brief •W€“I‚È’¸“_\‘¢
+     * @brief ï¿½Wï¿½ï¿½ï¿½Iï¿½È’ï¿½ï¿½_ï¿½\ï¿½ï¿½
      *
-     * - Position: ’¸“_‚Ì3DÀ•Wix, y, zj
-     * - Normal: –@üƒxƒNƒgƒ‹ - –Ê‚ÌŒü‚«‚ğ¦‚·iƒ‰ƒCƒeƒBƒ“ƒOŒvZ‚Ég‚¤j
-     * - TexCoord: ƒeƒNƒXƒ`ƒƒÀ•WiUVÀ•Wj- ‰æ‘œ‚Ì‚Ç‚Ì•”•ª‚ğ“\‚é‚©
+     * - Position: ï¿½ï¿½ï¿½_ï¿½ï¿½3Dï¿½ï¿½ï¿½Wï¿½ix, y, zï¿½j
+     * - Normal: ï¿½@ï¿½ï¿½ï¿½xï¿½Nï¿½gï¿½ï¿½ - ï¿½Ê‚ÌŒï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½iï¿½ï¿½ï¿½Cï¿½eï¿½Bï¿½ï¿½ï¿½Oï¿½vï¿½Zï¿½Égï¿½ï¿½ï¿½j
+     * - TexCoord: ï¿½eï¿½Nï¿½Xï¿½`ï¿½ï¿½ï¿½ï¿½ï¿½Wï¿½iUVï¿½ï¿½ï¿½Wï¿½j- ï¿½æ‘œï¿½Ì‚Ç‚Ì•ï¿½ï¿½ï¿½ï¿½ï¿½\ï¿½é‚©
      */
     struct StandardVertex {
-        Vector3 position;   // ˆÊ’ui12ƒoƒCƒgj
-        Vector3 normal;     // –@üi12ƒoƒCƒgj
-        float u, v;         // ƒeƒNƒXƒ`ƒƒÀ•Wi8ƒoƒCƒgj
+        Vector3 position;   // ï¿½Ê’uï¿½i12ï¿½oï¿½Cï¿½gï¿½j
+        Vector3 normal;     // ï¿½@ï¿½ï¿½ï¿½i12ï¿½oï¿½Cï¿½gï¿½j
+        float u, v;         // ï¿½eï¿½Nï¿½Xï¿½`ï¿½ï¿½ï¿½ï¿½ï¿½Wï¿½i8ï¿½oï¿½Cï¿½gï¿½j
 
         StandardVertex()
             : position(0, 0, 0)
@@ -38,7 +38,7 @@ namespace Athena {
         {
         }
 
-        // ŠÈˆÕ”Åi–@ü‚ÍŒã‚ÅŒvZ‚·‚é—pj
+        // ï¿½ÈˆÕ”Åiï¿½@ï¿½ï¿½ï¿½ÍŒï¿½ÅŒvï¿½Zï¿½ï¿½ï¿½ï¿½pï¿½j
         StandardVertex(const Vector3& pos, float u, float v)
             : position(pos)
             , normal(0, 1, 0)
@@ -48,23 +48,23 @@ namespace Athena {
     };
 
     // =====================================================
-    // ƒTƒuƒƒbƒVƒ…
+    // ï¿½Tï¿½uï¿½ï¿½ï¿½bï¿½Vï¿½ï¿½
     // =====================================================
 
     /**
-     * @brief ƒTƒuƒƒbƒVƒ…
+     * @brief ï¿½Tï¿½uï¿½ï¿½ï¿½bï¿½Vï¿½ï¿½
      *
-     * ƒTƒuƒƒbƒVƒ… = ƒƒbƒVƒ…‚Ìˆê•”•ª
-     * —áFÔ‚Ìƒ‚ƒfƒ‹
-     *   - ƒTƒuƒƒbƒVƒ…0: ƒ{ƒfƒBiÔ‚¢ƒ}ƒeƒŠƒAƒ‹j
-     *   - ƒTƒuƒƒbƒVƒ…1: ƒ^ƒCƒ„i•‚¢ƒ}ƒeƒŠƒAƒ‹j
+     * ï¿½Tï¿½uï¿½ï¿½ï¿½bï¿½Vï¿½ï¿½ = ï¿½ï¿½ï¿½bï¿½Vï¿½ï¿½ï¿½Ìˆê•”ï¿½ï¿½
+     * ï¿½ï¿½Fï¿½Ô‚Ìƒï¿½ï¿½fï¿½ï¿½
+     *   - ï¿½Tï¿½uï¿½ï¿½ï¿½bï¿½Vï¿½ï¿½0: ï¿½{ï¿½fï¿½Bï¿½iï¿½Ô‚ï¿½ï¿½}ï¿½eï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½j
+     *   - ï¿½Tï¿½uï¿½ï¿½ï¿½bï¿½Vï¿½ï¿½1: ï¿½^ï¿½Cï¿½ï¿½ï¿½iï¿½ï¿½ï¿½ï¿½ï¿½}ï¿½eï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½j
      *
-     * ˆÙ‚È‚éƒ}ƒeƒŠƒAƒ‹‚ğg‚¢‚½‚¢•”•ª‚²‚Æ‚É•ªŠ„‚·‚é
+     * ï¿½Ù‚È‚ï¿½}ï¿½eï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½gï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ‚É•ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
      */
     struct SubMesh {
-        uint32_t indexStart;   // ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@‚ÌŠJnˆÊ’u
-        uint32_t indexCount;   // g—p‚·‚éƒCƒ“ƒfƒbƒNƒX”
-        uint32_t materialID;   // ‚Ç‚Ìƒ}ƒeƒŠƒAƒ‹‚ğg‚¤‚©iŒã‚ÅÀ‘•j
+        uint32_t indexStart;   // ï¿½Cï¿½ï¿½ï¿½fï¿½bï¿½Nï¿½Xï¿½oï¿½bï¿½tï¿½@ï¿½ÌŠJï¿½nï¿½Ê’u
+        uint32_t indexCount;   // ï¿½gï¿½pï¿½ï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½fï¿½bï¿½Nï¿½Xï¿½ï¿½
+        uint32_t materialID;   // ï¿½Ç‚Ìƒ}ï¿½eï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½gï¿½ï¿½ï¿½ï¿½ï¿½iï¿½ï¿½Åï¿½ï¿½ï¿½ï¿½j
 
         SubMesh()
             : indexStart(0)
@@ -82,56 +82,56 @@ namespace Athena {
     };
 
     // =====================================================
-    // ƒƒbƒVƒ…ƒNƒ‰ƒX
+    // ï¿½ï¿½ï¿½bï¿½Vï¿½ï¿½ï¿½Nï¿½ï¿½ï¿½X
     // =====================================================
 
     /**
-     * @brief ƒƒbƒVƒ…ƒNƒ‰ƒX
+     * @brief ï¿½ï¿½ï¿½bï¿½Vï¿½ï¿½ï¿½Nï¿½ï¿½ï¿½X
      *
-     * 3Dƒ‚ƒfƒ‹‚ÌŒ`óƒf[ƒ^‚ğŠÇ—‚·‚é
-     * - ’¸“_ƒf[ƒ^
-     * - ƒCƒ“ƒfƒbƒNƒXƒf[ƒ^
-     * - ƒTƒuƒƒbƒVƒ…î•ñ
+     * 3Dï¿½ï¿½ï¿½fï¿½ï¿½ï¿½ÌŒ`ï¿½ï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½Ç—ï¿½ï¿½ï¿½ï¿½ï¿½
+     * - ï¿½ï¿½ï¿½_ï¿½fï¿½[ï¿½^
+     * - ï¿½Cï¿½ï¿½ï¿½fï¿½bï¿½Nï¿½Xï¿½fï¿½[ï¿½^
+     * - ï¿½Tï¿½uï¿½ï¿½ï¿½bï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½
      */
     class Mesh {
     public:
         Mesh();
         ~Mesh();
 
-        // ===== ‰Šú‰» =====
+        // ===== ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ =====
 
         /**
-         * @brief CPUƒƒ‚ƒŠ‚Éƒf[ƒ^‚ğİ’è
+         * @brief CPUï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Éƒfï¿½[ï¿½^ï¿½ï¿½İ’ï¿½
          *
-         * @param vertices ’¸“_ƒf[ƒ^‚Ì”z—ñ
-         * @param vertexCount ’¸“_”
-         * @param indices ƒCƒ“ƒfƒbƒNƒXƒf[ƒ^‚Ì”z—ñ
-         * @param indexCount ƒCƒ“ƒfƒbƒNƒX”
+         * @param vertices ï¿½ï¿½ï¿½_ï¿½fï¿½[ï¿½^ï¿½Ì”zï¿½ï¿½
+         * @param vertexCount ï¿½ï¿½ï¿½_ï¿½ï¿½
+         * @param indices ï¿½Cï¿½ï¿½ï¿½fï¿½bï¿½Nï¿½Xï¿½fï¿½[ï¿½^ï¿½Ì”zï¿½ï¿½
+         * @param indexCount ï¿½Cï¿½ï¿½ï¿½fï¿½bï¿½Nï¿½Xï¿½ï¿½
          */
         void SetVertices(const StandardVertex* vertices, uint32_t vertexCount);
         void SetIndices(const uint32_t* indices, uint32_t indexCount);
 
         /**
-         * @brief GPUƒoƒbƒtƒ@‚ğì¬‚µ‚Äƒf[ƒ^‚ğƒAƒbƒvƒ[ƒh
+         * @brief GPUï¿½oï¿½bï¿½tï¿½@ï¿½ï¿½ï¿½ì¬ï¿½ï¿½ï¿½Äƒfï¿½[ï¿½^ï¿½ï¿½ï¿½Aï¿½bï¿½vï¿½ï¿½ï¿½[ï¿½h
          */
         void UploadToGPU(ID3D12Device* device);
 
         /**
-         * @brief ƒTƒuƒƒbƒVƒ…‚ğ’Ç‰Á
+         * @brief ï¿½Tï¿½uï¿½ï¿½ï¿½bï¿½Vï¿½ï¿½ï¿½ï¿½Ç‰ï¿½
          */
         void AddSubMesh(const SubMesh& subMesh);
 
-        // ===== •`‰æ =====
+        // ===== ï¿½`ï¿½ï¿½ =====
 
         /**
-         * @brief •`‰æƒRƒ}ƒ“ƒh‚ğ”­s
+         * @brief ï¿½`ï¿½ï¿½Rï¿½}ï¿½ï¿½ï¿½hï¿½ğ”­s
          *
-         * @param commandList •`‰æƒRƒ}ƒ“ƒh‚ğ‹L˜^‚·‚éƒŠƒXƒg
-         * @param subMeshIndex ‚Ç‚ÌƒTƒuƒƒbƒVƒ…‚ğ•`‰æ‚·‚é‚©i-1 = ‘S•”j
+         * @param commandList ï¿½`ï¿½ï¿½Rï¿½}ï¿½ï¿½ï¿½hï¿½ï¿½ï¿½Lï¿½^ï¿½ï¿½ï¿½éƒŠï¿½Xï¿½g
+         * @param subMeshIndex ï¿½Ç‚ÌƒTï¿½uï¿½ï¿½ï¿½bï¿½Vï¿½ï¿½ï¿½ï¿½`ï¿½æ‚·ï¿½é‚©ï¿½i-1 = ï¿½Sï¿½ï¿½ï¿½j
          */
         void Draw(ID3D12GraphicsCommandList* commandList, int subMeshIndex = -1);
 
-        // ===== î•ñæ“¾ =====
+        // ===== ï¿½ï¿½ï¿½æ“¾ =====
 
         uint32_t GetVertexCount() const { return static_cast<uint32_t>(vertices.size()); }
         uint32_t GetIndexCount() const { return static_cast<uint32_t>(indices.size()); }
@@ -140,26 +140,43 @@ namespace Athena {
         const std::vector<StandardVertex>& GetVertices() const { return vertices; }
         const std::vector<uint32_t>& GetIndices() const { return indices; }
 
-        // ===== ƒoƒbƒtƒ@ƒAƒNƒZƒX =====
+        // ===== ï¿½oï¿½bï¿½tï¿½@ï¿½Aï¿½Nï¿½Zï¿½X =====
         Buffer* GetVertexBuffer() { return vertexBuffer.get(); }
         Buffer* GetIndexBuffer() { return indexBuffer.get(); }
+        
+        // ===== Material =====
+        uint32_t GetMaterialIndex() const { return materialIndex; }
+        void SetMaterialIndex(uint32_t index) { materialIndex = index; }
+        
+        // ===== Model Loading Support =====
+        void SetVertexData(const void* data, size_t dataSize, size_t stride);
+        void SetIndexData(const void* data, size_t dataSize, size_t indexCount);
+        void CreateBuffers(ID3D12Device* device);
+        
+        // Raw data access methods for RenderGraph integration
+        size_t GetRawVertexDataSize() const { return rawVertexData.size(); }
+        size_t GetRawIndexDataSize() const { return rawIndexData.size(); }
+        size_t GetVertexStride() const { return vertexStride; }
+        size_t GetRawIndexCount() const { return rawIndexCount; }
+        const void* GetRawVertexData() const { return rawVertexData.data(); }
+        const void* GetRawIndexData() const { return rawIndexData.data(); }
 
-        // ===== ƒ†[ƒeƒBƒŠƒeƒB =====
+        // ===== ï¿½ï¿½ï¿½[ï¿½eï¿½Bï¿½ï¿½ï¿½eï¿½B =====
 
         /**
-         * @brief –@üƒxƒNƒgƒ‹‚ğ©“®ŒvZ
+         * @brief ï¿½@ï¿½ï¿½ï¿½xï¿½Nï¿½gï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½vï¿½Z
          *
-         * –@ü = –Ê‚ÌŒü‚«‚ğ¦‚·ƒxƒNƒgƒ‹
-         * ƒ‰ƒCƒeƒBƒ“ƒOiŒõ‚ÌŒvZj‚É•K{
-         * OŠpŒ`‚Ì2•Ó‚ÌŠOÏ‚ÅŒvZ‚Å‚«‚é
+         * ï¿½@ï¿½ï¿½ = ï¿½Ê‚ÌŒï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½xï¿½Nï¿½gï¿½ï¿½
+         * ï¿½ï¿½ï¿½Cï¿½eï¿½Bï¿½ï¿½ï¿½Oï¿½iï¿½ï¿½ï¿½ÌŒvï¿½Zï¿½jï¿½É•Kï¿½{
+         * ï¿½Oï¿½pï¿½`ï¿½ï¿½2ï¿½Ó‚ÌŠOï¿½Ï‚ÅŒvï¿½Zï¿½Å‚ï¿½ï¿½ï¿½
          */
         void CalculateNormals();
 
         /**
-         * @brief ƒoƒEƒ“ƒfƒBƒ“ƒOƒ{ƒbƒNƒX‚ğŒvZ
+         * @brief ï¿½oï¿½Eï¿½ï¿½ï¿½fï¿½Bï¿½ï¿½ï¿½Oï¿½{ï¿½bï¿½Nï¿½Xï¿½ï¿½ï¿½vï¿½Z
          *
-         * ƒoƒEƒ“ƒfƒBƒ“ƒOƒ{ƒbƒNƒX = ƒƒbƒVƒ…‚ğˆÍ‚Ş’¼•û‘Ì
-         * Õ“Ë”»’è‚âƒJƒŠƒ“ƒOi‰æ–ÊŠO”»’èj‚Ég‚¤
+         * ï¿½oï¿½Eï¿½ï¿½ï¿½fï¿½Bï¿½ï¿½ï¿½Oï¿½{ï¿½bï¿½Nï¿½X = ï¿½ï¿½ï¿½bï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½Í‚Ş’ï¿½ï¿½ï¿½ï¿½ï¿½
+         * ï¿½Õ“Ë”ï¿½ï¿½ï¿½ï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½Oï¿½iï¿½ï¿½ÊŠOï¿½ï¿½ï¿½ï¿½jï¿½Égï¿½ï¿½
          */
         void CalculateBounds();
 
@@ -169,48 +186,61 @@ namespace Athena {
         Vector3 GetBoundsSize() const { return boundsMax - boundsMin; }
 
     private:
-        // CPUƒƒ‚ƒŠ‚Ìƒf[ƒ^
+        // CPUï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ìƒfï¿½[ï¿½^
         std::vector<StandardVertex> vertices;
         std::vector<uint32_t> indices;
         std::vector<SubMesh> subMeshes;
 
-        // GPUƒoƒbƒtƒ@
+        // GPUï¿½oï¿½bï¿½tï¿½@
         std::unique_ptr<Buffer> vertexBuffer;
         std::unique_ptr<Buffer> indexBuffer;
 
-        // ƒoƒEƒ“ƒfƒBƒ“ƒOƒ{ƒbƒNƒX
+        // Bounding box
         Vector3 boundsMin;
         Vector3 boundsMax;
+        
+        // Material index for ModelLoader compatibility  
+        uint32_t materialIndex = 0;
+        
+        // Vertex/Index counts for ModelLoader
+        uint32_t vertexCount = 0;
+        uint32_t indexCount = 0;
+        
+        // Raw data storage for model loading
+        std::vector<uint8_t> rawVertexData;
+        std::vector<uint8_t> rawIndexData;
+        size_t vertexStride = 0;
+        size_t rawIndexCount = 0;
 
-        // ’¸“_ƒŒƒCƒAƒEƒgi’¸“_‚Ì\‘¢‚ğGPU‚É‹³‚¦‚éj
-        static constexpr uint32_t VERTEX_STRIDE = sizeof(StandardVertex);  // 32ƒoƒCƒg
+        // ï¿½ï¿½ï¿½_ï¿½ï¿½ï¿½Cï¿½Aï¿½Eï¿½gï¿½iï¿½ï¿½ï¿½_ï¿½Ì\ï¿½ï¿½ï¿½ï¿½GPUï¿½É‹ï¿½ï¿½ï¿½ï¿½ï¿½j
+        static constexpr uint32_t VERTEX_STRIDE = sizeof(StandardVertex);  // 32ï¿½oï¿½Cï¿½g
     };
 
     // =====================================================
-    // ƒvƒŠƒ~ƒeƒBƒu¶¬i•Ö—˜ŠÖ”j
+    // ï¿½vï¿½ï¿½ï¿½~ï¿½eï¿½Bï¿½uï¿½ï¿½ï¿½ï¿½ï¿½iï¿½Ö—ï¿½ï¿½Öï¿½ï¿½j
     // =====================================================
 
     /**
-     * @brief Šî–{“I‚ÈŒ`ó‚ğ¶¬‚·‚éƒwƒ‹ƒp[ŠÖ”
+     * @brief ï¿½ï¿½{ï¿½Iï¿½ÈŒ`ï¿½ï¿½ğ¶ï¿½ï¿½ï¿½ï¿½ï¿½wï¿½ï¿½ï¿½pï¿½[ï¿½Öï¿½
      */
     namespace MeshGenerator {
 
         /**
-         * @brief ƒLƒ…[ƒui—§•û‘Ìj‚ğ¶¬
+         * @brief ï¿½Lï¿½ï¿½ï¿½[ï¿½uï¿½iï¿½ï¿½ï¿½ï¿½ï¿½Ìjï¿½ğ¶ï¿½
          */
         std::unique_ptr<Mesh> CreateCube(float size = 1.0f);
 
         /**
-         * @brief ‹…‘Ì‚ğ¶¬
+         * @brief ï¿½ï¿½ï¿½Ì‚ğ¶ï¿½
          *
-         * @param radius ”¼Œa
-         * @param slices Œo“x•ûŒü‚Ì•ªŠ„”i‰¡j
-         * @param stacks ˆÜ“x•ûŒü‚Ì•ªŠ„”icj
+         * @param radius ï¿½ï¿½ï¿½a
+         * @param slices ï¿½oï¿½xï¿½ï¿½ï¿½ï¿½ï¿½Ì•ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½iï¿½ï¿½ï¿½j
+         * @param stacks ï¿½Ü“xï¿½ï¿½ï¿½ï¿½ï¿½Ì•ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½iï¿½cï¿½j
          */
         std::unique_ptr<Mesh> CreateSphere(float radius = 1.0f, uint32_t slices = 32, uint32_t stacks = 16);
 
         /**
-         * @brief •½–Ê‚ğ¶¬
+         * @brief ï¿½ï¿½ï¿½Ê‚ğ¶ï¿½
          */
         std::unique_ptr<Mesh> CreatePlane(float width = 1.0f, float depth = 1.0f, uint32_t subdivisions = 1);
 

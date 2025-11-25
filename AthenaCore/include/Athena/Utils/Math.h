@@ -492,6 +492,40 @@ namespace Athena {
             mat.m[3][2] = nearZ / (nearZ - farZ);
             return mat;
         }
+
+        // エイリアスメソッド (SceneObject.cpp互換性)
+        static Matrix4x4 CreateScale(float x, float y, float z) {
+            return Scaling(x, y, z);
+        }
+        
+        static Matrix4x4 CreateTranslation(float x, float y, float z) {
+            return Translation(x, y, z);
+        }
+        
+        static Matrix4x4 CreateRotationX(float angle) {
+            return RotationX(angle);
+        }
+        
+        static Matrix4x4 CreateRotationY(float angle) {
+            return RotationY(angle);
+        }
+        
+        static Matrix4x4 CreateRotationZ(float angle) {
+            return RotationZ(angle);
+        }
+
+        // ベクトル変換
+        Vector3 TransformPoint(const Vector3& point) const {
+            float x = m[0][0] * point.x + m[0][1] * point.y + m[0][2] * point.z + m[0][3];
+            float y = m[1][0] * point.x + m[1][1] * point.y + m[1][2] * point.z + m[1][3];
+            float z = m[2][0] * point.x + m[2][1] * point.y + m[2][2] * point.z + m[2][3];
+            float w = m[3][0] * point.x + m[3][1] * point.y + m[3][2] * point.z + m[3][3];
+            
+            if (w != 0.0f && w != 1.0f) {
+                return Vector3(x / w, y / w, z / w);
+            }
+            return Vector3(x, y, z);
+        }
     };
 
     // 定数

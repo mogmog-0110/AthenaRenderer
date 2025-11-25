@@ -10,15 +10,24 @@ namespace Athena {
         frameTimeIndex = 0;
         initialized = false;
         enableDeferredRendering = false;
-        currentGeometry = 0;
         renderingModeChanged = false;
-        geometryModeChanged = false;
         cameraResetRequested = false;
+        mouseCaptured = false;
+        mouseCaptureChanged = false;
         currentFPS = 0.0f;
         frameTime = 0.0f;
         averageFPS = 60.0f;
         showCameraControls = true;
         showRenderGraphStats = true;
+        
+        // 統計情報の初期化
+        drawCallCount = 0;
+        vertexCount = 0;
+        memoryUsageMB = 0.0f;
+        renderGraphTotalPasses = 0;
+        renderGraphTotalResources = 0;
+        renderGraphExecutedPasses = 0;
+        renderGraphMemoryMB = 0.0f;
     }
 
     ImGuiManager::~ImGuiManager() {
@@ -144,10 +153,10 @@ namespace Athena {
         if (showRenderGraphStats) {
             if (ImGui::Begin("RenderGraph Statistics", &showRenderGraphStats)) {
                 ImGui::Text("RenderGraph Debug Info");
-                ImGui::Text("Total Passes: N/A"); // TODO: Get from RenderGraph
-                ImGui::Text("Total Resources: N/A");
-                ImGui::Text("Executed Passes: N/A");
-                ImGui::Text("Memory Usage: N/A MB");
+                ImGui::Text("Total Passes: %u", renderGraphTotalPasses);
+                ImGui::Text("Total Resources: %u", renderGraphTotalResources);
+                ImGui::Text("Executed Passes: %u", renderGraphExecutedPasses);
+                ImGui::Text("Memory Usage: %.1f MB", renderGraphMemoryMB);
             }
             ImGui::End();
         }
@@ -169,18 +178,9 @@ namespace Athena {
                             "Deferred: G-Buffer based lighting (better for many lights)");
         }
 
-        // Geometry toggle
-        const char* geometryItems[] = { "Sphere", "Cube" }; // 順序を逆にして修正
-        int oldGeometry = currentGeometry;
-        if (ImGui::Combo("Geometry", &currentGeometry, geometryItems, IM_ARRAYSIZE(geometryItems))) {
-            geometryModeChanged = true;
-        }
-
         // Current rendering state display
         ImGui::Spacing();
         ImGui::Text("Current Mode: %s", enableDeferredRendering ? "Deferred" : "Forward");
-        // 実際のジオメトリモード表示（DisplayModeに基づく）
-        ImGui::Text("Current Geometry: %s", (currentGeometry == 0) ? "Cube" : "Sphere");
     }
 
     void ImGuiManager::RenderPerformanceStats() {
@@ -194,12 +194,12 @@ namespace Athena {
         ImGui::PlotLines("Frame Times", frameTimeHistory.data(), frameTimeHistory.size(),
             frameTimeIndex, "Frame Time (ms)", 0.0f, 50.0f, ImVec2(0, 80));
 
-        // Memory usage (placeholder)
-        ImGui::Text("Memory Usage: %.1f MB", 0.0f); // TODO: Get actual memory usage
+        // Memory usage
+        ImGui::Text("Memory Usage: %.1f MB", memoryUsageMB);
 
-        // GPU statistics (placeholder)
-        ImGui::Text("Draw Calls: %d", 0); // TODO: Get actual draw call count
-        ImGui::Text("Vertices: %d", 0); // TODO: Get actual vertex count
+        // GPU statistics
+        ImGui::Text("Draw Calls: %u", drawCallCount);
+        ImGui::Text("Vertices: %u", vertexCount);
     }
 
     void ImGuiManager::RenderCameraControls() {
@@ -218,15 +218,42 @@ namespace Athena {
             cameraResetRequested = true;
         }
         
+        ImGui::SameLine();
+        
+        // Mouse capture toggle button
+        bool oldMouseCaptured = mouseCaptured;
+        if (ImGui::Checkbox("Mouse Capture", &mouseCaptured)) {
+            mouseCaptureChanged = true;
+        }
+        ImGui::SameLine();
+        ImGui::TextDisabled("(?)");
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("Enable mouse capture for camera look-around\n"
+                            "When enabled, mouse movement controls camera rotation\n"
+                            "Press 'C' key or use this checkbox to toggle");
+        }
+        
         ImGui::Spacing();
         
         // Help information toggle
         if (ImGui::CollapsingHeader("Legacy Keyboard Controls")) {
             ImGui::TextWrapped("Legacy controls (still available):");
             ImGui::BulletText("G: Toggle rendering mode");
-            ImGui::BulletText("Space: Switch geometry");
             ImGui::BulletText("ESC: Exit application");
         }
+    }
+
+    void ImGuiManager::UpdateRenderingStats(uint32_t drawCalls, uint32_t vertices, float memoryMB) {
+        drawCallCount = drawCalls;
+        vertexCount = vertices;
+        memoryUsageMB = memoryMB;
+    }
+
+    void ImGuiManager::UpdateRenderGraphStats(uint32_t totalPasses, uint32_t totalResources, uint32_t executedPasses, float renderGraphMemoryMB) {
+        renderGraphTotalPasses = totalPasses;
+        renderGraphTotalResources = totalResources;
+        renderGraphExecutedPasses = executedPasses;
+        this->renderGraphMemoryMB = renderGraphMemoryMB;
     }
 
 } // namespace Athena
